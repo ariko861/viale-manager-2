@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->string('prenom');
-            $table->date('date_de_naissance');
+            $table->date('date_de_naissance')->nullable();
             $table->boolean('confirmed')->default(false);
             $table->string('email')->nullable();
             $table->string('phone')->nullable();

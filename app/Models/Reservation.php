@@ -13,7 +13,11 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["confirmed_at"];
+    protected $fillable = ["confirmed_at", "remarques_accueil", "remarques_visiteur"];
+    protected $attributes = [
+        'max_days_change' => 255,
+        'max_visitors' => 5
+    ];
 
     public function sejours(): HasMany
     {
@@ -48,5 +52,12 @@ class Reservation extends Model
     public function scopeIsConfirmed(Builder $query): void
     {
         $query->whereNotNull('confirmed_at');
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Reservation $reservation) {
+            $reservation->generateLinkToken();
+        });
     }
 }

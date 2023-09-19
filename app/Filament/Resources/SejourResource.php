@@ -4,12 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SejourResource\Pages;
 use App\Filament\Resources\SejourResource\RelationManagers;
+use App\Models\Reservation;
 use App\Models\Sejour;
 use App\Models\Visitor;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -17,8 +19,10 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class SejourResource extends Resource
 {
     protected static ?string $model = Sejour::class;
+    protected static ?string $modelLabel = "Séjour";
+    protected static ?string $navigationGroup = "Accueil";
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 
     public static function form(Form $form): Form
     {
@@ -48,16 +52,15 @@ class SejourResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('reservation.id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('visitor.nom')
+                    ->label("Nom")
                     ->sortable(),
-                Tables\Columns\TextColumn::make('visitor_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('visitor.prenom')
+                    ->label("Prénom")
                     ->sortable(),
                 Tables\Columns\IconColumn::make('confirmed')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('remove_from_stats')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('remove_from_stats'),
                 Tables\Columns\TextColumn::make('arrival_date')
                     ->date()
                     ->sortable(),
@@ -73,8 +76,23 @@ class SejourResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('arrival_date')
+            ->groups([
+                Group::make('reservation.id')
+                    ->label("Réservation")
+                    ->getDescriptionFromRecordUsing(function(Sejour $record): ?string {
+                        return $record->getRemarques();
+                    }),
+            ])
+//            ->defaultGroup('reservation.id')
             ->filters([
                 //
+                Tables\Filters\Filter::make('remove_past')
+                    ->label("Ne pas afficher les séjours passés")
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->scopes('withoutPast'))
+                    ->default()
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -101,7 +119,7 @@ class SejourResource extends Resource
     {
         return [
             'index' => Pages\ListSejours::route('/'),
-            'create' => Pages\CreateSejour::route('/create'),
+            'create' => ReservationResource\Pages\CreateReservation::route('/create'),
             'view' => Pages\ViewSejour::route('/{record}'),
             'edit' => Pages\EditSejour::route('/{record}/edit'),
         ];

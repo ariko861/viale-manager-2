@@ -17,25 +17,17 @@ class ReservationResource extends Resource
 {
     protected static ?string $model = Reservation::class;
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->scopes(['isConfirmed']);
-    }
+//    public static function getEloquentQuery(): Builder
+//    {
+//        return parent::getEloquentQuery()->scopes(['isConfirmed']);
+//    }
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Toggle::make('authorize_edition')
-                    ->required(),
-                Forms\Components\TextInput::make('max_days_change')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('max_visitors')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\DateTimePicker::make('confirmed_at'),
+
             ]);
     }
 
@@ -67,6 +59,11 @@ class ReservationResource extends Resource
             ])
             ->filters([
                 //
+                Tables\Filters\Filter::make('isConfirmed')
+                    ->query(fn(Builder $query): Builder => $query->whereNotNull('confirmed_at'))
+                    ->toggle()
+                    ->default(),
+
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

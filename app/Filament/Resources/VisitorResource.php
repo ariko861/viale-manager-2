@@ -17,7 +17,9 @@ class VisitorResource extends Resource
 {
     protected static ?string $model = Visitor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static ?string $navigationGroup = "Accueil";
+    protected static ?string $modelLabel = "Visiteur";
 
     public static function form(Form $form): Form
     {
@@ -83,14 +85,14 @@ class VisitorResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -99,5 +101,5 @@ class VisitorResource extends Resource
             'view' => Pages\ViewVisitor::route('/{record}'),
             'edit' => Pages\EditVisitor::route('/{record}/edit'),
         ];
-    }    
+    }
 }

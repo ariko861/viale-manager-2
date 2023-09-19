@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Filament\Resources\RoomResource;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,5 +23,21 @@ class Sejour extends Model
     public function visitor(): BelongsTo
     {
         return $this->belongsTo(Visitor::class);
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class);
+    }
+
+    public function getRemarques(): ?string
+    {
+        $remarques_visiteurs = $this->reservation?->remarques_visiteur ?? "Pas de remarque";
+        $remarques_accueil = $this->reservation?->remarques_accueil ?? "Pas de remarque";
+        return "Remarques visiteur: {$remarques_visiteurs}\nRemarques accueil: {$remarques_accueil}";
+    }
+
+    public function scopeWithoutPast(Builder $query): void {
+        $query->where('departure_date', '>=', Carbon::today())->orWhereNull('departure_date');
     }
 }
