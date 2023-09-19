@@ -13,10 +13,14 @@ class Visitor extends Model
 
     protected $fillable = ["nom", "prenom", "confirmed", "date_de_naissance", "email", "phone"];
 
-    protected function full_name(): Attribute
+//    protected function full_name(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (): string => "{$this->prenom} {$this->nom}",
+//        );
+//    }
+    public function getFullNameAttribute(): string
     {
-        return Attribute::make(
-            get: fn (): string => "{$this->prenom} {$this->nom}",
-        );
+        return "{$this->prenom} {$this->nom}";
     }
 }

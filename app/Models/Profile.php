@@ -9,6 +9,8 @@ class Profile extends Model
 {
     use HasFactory;
 
+    protected $fillable = ["name", "price", "remarques", "is_default"];
+
     public function getEuroAttribute()
     {
         return number_format($this->price, 2,'€',' ');

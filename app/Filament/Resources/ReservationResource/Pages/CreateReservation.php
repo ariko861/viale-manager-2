@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ReservationResource\Pages;
 
 use App\Filament\Resources\ReservationResource;
+use App\Models\Profile;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Checkbox;
@@ -86,6 +87,10 @@ class CreateReservation extends CreateRecord
                                         ->live()
                                         ->default($this->no_departure_date),
                                 ]),
+                            Select::make('profile_id')
+                                ->label("Profil de prix")
+                                ->relationship('profile', 'name')
+                                ->getOptionLabelFromRecordUsing(fn (Profile $record) => "{$record->name} {$record->euro}"),
                             Select::make('room_id')
                                 ->label("Chambre")
                                 ->relationship('room', 'name')

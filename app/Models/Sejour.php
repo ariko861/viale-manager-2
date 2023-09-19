@@ -30,6 +30,11 @@ class Sejour extends Model
         return $this->belongsTo(Room::class);
     }
 
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(Profile::class);
+    }
+
     public function getRemarques(): ?string
     {
         $remarques_visiteurs = $this->reservation?->remarques_visiteur ?? "Pas de remarque";

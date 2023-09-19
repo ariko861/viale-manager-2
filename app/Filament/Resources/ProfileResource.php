@@ -32,7 +32,7 @@ class ProfileResource extends Resource
                     ->prefix('€'),
                 Forms\Components\Toggle::make('is_default')
                     ->required(),
-                Forms\Components\TextInput::make('remarks')
+                Forms\Components\TextInput::make('remarques')
                     ->required(),
             ]);
     }
@@ -48,7 +48,7 @@ class ProfileResource extends Resource
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_default')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('remarks')
+                Tables\Columns\TextColumn::make('remarques')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
