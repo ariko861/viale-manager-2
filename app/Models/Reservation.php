@@ -36,7 +36,7 @@ class Reservation extends Model
     }
 
     public function getLink(): string {
-        return urldecode(route('home') . '?link_token=' . $this->link_token);
+        return urldecode(route('confirmation', $this->link_token) );// . '?link_token=' . $this->link_token);
     }
 
     public static function createQuickReservation(int $max_days_change = 5, int $max_visitors = 5): self
