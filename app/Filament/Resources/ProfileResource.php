@@ -59,6 +59,7 @@ class ProfileResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->paginated(false)
             ->filters([
                 //
             ])

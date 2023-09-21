@@ -67,6 +67,12 @@ class RoomResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->groups([
+                Tables\Grouping\Group::make('house.name')
+                    ->label("Maison"),
+            ])
+            ->paginated(false)
+            ->defaultGroup('house.name')
             ->defaultSort('house.name')
             ->filters([
                 //
