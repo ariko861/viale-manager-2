@@ -28,23 +28,35 @@ class SejourResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('reservation_id')
-                    ->relationship('reservation', 'id')
-                    ->required(),
-                Forms\Components\Select::make('visitor_id')
-                    ->relationship('visitor', 'nom')
-                    ->required(),
+
+                Forms\Components\Section::make('visitor')
+                    ->relationship('visitor')
+                    ->schema([
+                        Forms\Components\TextInput::make('nom')
+                            ->required(),
+                        Forms\Components\TextInput::make('prenom')
+                            ->required(),
+                    ]),
+
                 Forms\Components\Toggle::make('confirmed')
                     ->required(),
                 Forms\Components\Toggle::make('remove_from_stats')
                     ->required(),
-                Forms\Components\DatePicker::make('arrival_date')
-                    ->required(),
-                Forms\Components\DatePicker::make('departure_date'),
-                Forms\Components\Textarea::make('remarques_visiteur')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('remarques_accueil')
-                    ->columnSpanFull(),
+                Forms\Components\Section::make('dates')
+                    ->schema([
+                        Forms\Components\DatePicker::make('arrival_date')
+                            ->required(),
+                        Forms\Components\DatePicker::make('departure_date'),
+                    ]),
+                Forms\Components\Section::make('reservation')
+                    ->relationship('reservation')
+                    ->schema([
+                        Forms\Components\Textarea::make('remarques_visiteur')
+                            ->columnSpanFull(),
+                        Forms\Components\Textarea::make('remarques_accueil')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('getLink'),
+                    ])
             ]);
     }
 
