@@ -15,6 +15,7 @@ use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class SejourResource extends Resource
 {
@@ -55,7 +56,10 @@ class SejourResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Textarea::make('remarques_accueil')
                             ->columnSpanFull(),
-                        Forms\Components\TextInput::make('getLink'),
+                        Forms\Components\Placeholder::make('lien')
+                            ->content(function(Reservation $record): HtmlString {
+                                return new HtmlString("<span class='text-primary-400 cursor-pointer'>{$record->getLink()}</span>");
+                            })
                     ])
             ]);
     }
