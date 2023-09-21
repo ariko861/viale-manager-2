@@ -25,6 +25,8 @@ class MessageResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\TextInput::make('title')
+                    ->required(),
                 Forms\Components\Textarea::make('message')
                     ->required()
                     ->columnSpanFull(),
@@ -38,6 +40,8 @@ class MessageResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('title')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('message')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
