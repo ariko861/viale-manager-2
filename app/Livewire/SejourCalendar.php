@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Sejour;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -52,8 +53,43 @@ class SejourCalendar extends LivewireCalendar
         return $arrivalEvents->concat($departureEvents);
     }
 
-//    public function render()
-//    {
-//        return view('livewire.sejour-calendar');
-//    }
+
+    ### TODO : Include @livewireCalendarScripts to make it work
+    public function onEventDropped($eventId, $year, $month, $day)
+    {
+        // This event will fire when an event is dragged and dropped into another calendar day
+        // You will get the event id, year, month and day where it was dragged to
+        $this->authorize('reservation-edit');
+        $date = new Carbon("{$year}-{$month}-${day}");
+        $newdate = new Carbon("{$year}-{$month}-${day}");
+        $sejourId = substr($eventId, 1);
+        $eventType = $eventId[0];
+
+        $sejour = Sejour::find($sejourId);
+        switch($eventType){
+            case "a":
+                $sejour->arrival_date = $date;
+                if ($date >= $sejour->departure_date)
+                {
+                    $sejour->departure_date = $newdate->addDays(1);
+//                     dd($date);
+                }
+                $sejour->save();
+                break;
+            case "d":
+                if ($date <= $sejour->arrival_date)
+                {
+                    $this->dispatch('showAlert', [ __("La date de départ ne peut pas précéder la date d'arrivée !"), "bg-red-500" ] );
+                    ###TODO : Replace with Filament Notify
+
+                } else {
+                    $sejour->departure_date = $date;
+                    $sejour->save();
+                }
+                break;
+            default:
+                return;
+        }
+    }
+
 }
