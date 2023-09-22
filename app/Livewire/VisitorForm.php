@@ -8,7 +8,9 @@ use App\Models\Profile;
 use App\Models\Reservation;
 use App\Models\Visitor;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
@@ -22,6 +24,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\HtmlString;
 use Livewire\Component;
@@ -36,14 +39,15 @@ class VisitorForm extends Component implements HasForms
 
     public $departure_date;
     public $arrival_date;
-    public bool $no_departure_date = false;
+    public $existing_visitors;
+    public int $selected_visitor_id = 0;
 
     public ?array $data = [];
 
     public function mount($link_token){
         $reservation = Reservation::firstWhere('link_token', $link_token);
 
-        if ($reservation) {
+        if ($reservation?->authorize_edition) {
             $this->valid_token = true;
             $this->reservation = $reservation;
         }
@@ -58,6 +62,7 @@ class VisitorForm extends Component implements HasForms
         return $form
             ->schema([
                 Section::make('Confirmation de votre réservation')
+                    ->id('confirmation')
                     ->description('prout prout')
                     ->schema([
 
@@ -78,31 +83,59 @@ class VisitorForm extends Component implements HasForms
                                         ->required()
                                         ->minDate($this->arrival_date)
                                         ->afterStateUpdated(fn ($state) => $this->departure_date = $state),
-                                ]),
+                                ])
+                                ->columns(2),
                             Step::make('Visiteurs')
                                 ->icon("heroicon-o-user-group")
                                 ->description("Quelles seront les personnes présentes dans ce groupe ?")
                                 ->schema([
                                     Repeater::make('sejours')
-                                        ->relationship("sejours")
+//                                        ->relationship("sejours")
                                         ->label("Personnes")
-                                        ->defaultItems(0)
+                                        ->required()
+                                        ->defaultItems(1)
+                                        ->minItems(1)
+                                        ->reorderable()
+                                        ->addAction( function(\Filament\Forms\Components\Actions\Action $action) {
+                                            return $action
+                                                ->label('Ajouter une personne')
+                                                ->icon('heroicon-o-user');
+                                        })
                                         ->schema([
-                                            Select::make("visitor_id")
-                                                ->relationship("visitor", "nom")
-                                                ->getOptionLabelFromRecordUsing(fn(Visitor $record): string => "{$record->nom} {$record->prenom}")
-                                                ->createOptionForm([
+                                            Section::make("visitor_id")
+                                                ->schema([
+                                                    Select::make('visitor_email')
+                                                        ->label("Email")
+                                                        ->placeholder('Saisissez votre email ici')
+                                                        ->searchable()
+                                                        ->getSearchResultsUsing(fn (string $search) => Visitor::where('email',$search)->limit(50)->get()->mapWithKeys(function(Visitor $visitor){
+                                                            return [ $visitor->id => "{$visitor->nom} {$visitor->prenom}" ];
+                                                        }))
+                                                        ->live()
+                                                        ->afterStateUpdated(function(Set $set, $state){
+                                                            $visitor = Visitor::find($state);
+
+                                                            if ($visitor) {
+                                                                $set('email', $visitor->email);
+                                                                $set('nom', $visitor->nom);
+                                                                $set('prenom', $visitor->prenom);
+                                                                $set('date_de_naissance', $visitor->date_de_naissance);
+                                                                $set('phone', $visitor->phone);
+                                                                $set('visitor_id', $visitor->id);
+                                                            }
+                                                        }),
+                                                    TextInput::make('email')
+                                                        ->email(),
                                                     TextInput::make('nom')
                                                         ->required(),
                                                     TextInput::make('prenom')
                                                         ->required(),
-                                                    TextInput::make('email')
-                                                        ->email()
+                                                    DatePicker::make('date_de_naissance')
                                                         ->required(),
-                                                    DatePicker::make('date_de_naissance'),
                                                     TextInput::make('phone'),
-                                                ])
-                                                ->required(),
+                                                    Hidden::make('new_visitor'),
+                                                    Hidden::make('visitor_id')
+                                                ]),
                                             Section::make('dates')
                                                 ->description("Vous pouvez changer les dates individuellement")
                                                 ->collapsed()
@@ -115,12 +148,13 @@ class VisitorForm extends Component implements HasForms
                                                         ->default($this->departure_date),
                                                 ]),
                                             Select::make('profile_id')
+                                                ->required()
                                                 ->label("Profil de prix")
-                                                ->relationship('profile', 'name')
-                                                ->getOptionLabelFromRecordUsing(fn (Profile $record) => "{$record->name} {$record->euro}"),
+                                                ->options(Profile::all()->mapWithKeys(function(Profile $profile){
+                                                    return [ $profile->id => "{$profile->name} {$profile->euro}" ];
+                                                }))
 
                                         ])
-                                        ->minItems(1)
                                 ]),
                             Step::make('Remarques')
                                 ->icon("heroicon-o-chat-bubble-bottom-center-text")
@@ -139,8 +173,28 @@ class VisitorForm extends Component implements HasForms
 BLADE)))
                     ]),
             ])
-            ->model($this->reservation)
+//            ->model($this->reservation)
             ->statePath('data');
+    }
+
+    public function create(): void
+    {
+        dd($this->form->getState());
+    }
+
+    public function selectVisitor()
+    {
+        $visitor = Visitor::find($this->selected_visitor_id);
+        $this->form->fill(['sejours' => [
+                0 => [
+                    'nom' => $visitor->nom,
+                    'prenom' => $visitor->prenom,
+                    'date_de_naissance' => $visitor->date_de_naissance,
+                    'phone' => $visitor->phone,
+                ]
+            ]
+        ]);
+        $this->dispatch('close-modal', id: 'select-existing-visitor');
     }
 
     public function render()
