@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sejour extends Model
 {
@@ -33,6 +34,11 @@ class Sejour extends Model
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Profile::class);
+    }
+
+    public function accompagnants(): HasMany
+    {
+        return $this->hasMany(self::class, 'reservation_id', 'reservation_id');
     }
 
     public function getRemarques(): ?string
