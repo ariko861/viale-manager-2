@@ -14,7 +14,7 @@ class Sejour extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["reservation_id", "visitor_id", "confirmed", "remove_from_stats", "arrival_date", "departure_date", "remarques_visiteur", "remarques_accueil"];
+    protected $fillable = ["reservation_id", "visitor_id", "profile_id", "confirmed", "remove_from_stats", "arrival_date", "departure_date", "remarques_visiteur", "remarques_accueil"];
 
     public function reservation(): BelongsTo
     {
@@ -50,5 +50,13 @@ class Sejour extends Model
 
     public function scopeWithoutPast(Builder $query): void {
         $query->where('departure_date', '>=', Carbon::today())->orWhereNull('departure_date');
+    }
+
+    public function scopeWithinDates(Builder $query, Carbon $startDate, Carbon $endDate): void {
+        $query->whereDate('arrival_date', '<=', $endDate)
+            ->where(function (Builder $q) use ($startDate){
+                $q->whereDate('departure_date', '>=', $startDate)
+                    ->orWhereNull('departure_date');
+            });
     }
 }

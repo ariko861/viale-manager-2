@@ -199,7 +199,6 @@ BLADE)))
     public function create(): void
     {
         $data = $this->form->getState();
-//        dd($this->form->getState());
         $this->reservation->confirmed_at = now();
         $this->reservation->authorize_edition = false;
         $this->reservation->remarques_visiteur = $data["remarques_visiteur"];
@@ -220,11 +219,13 @@ BLADE)))
                     'email' => $sejourData["email"]
                 ]);
             }
+            $profile = Profile::find($sejourData["profile_id"]);
+            if (!$profile) $profile = Profile::where('is_default', true)->first();
             // Pour ensuite l'assigner au séjour nouvellement créé:
             $sejour = Sejour::create([
                 'arrival_date' => $sejourData["arrival_date"],
                 'departure_date' => $sejourData["departure_date"],
-                'profile_id' => $sejourData["profile_id"],
+                'profile_id' => $profile->id,
                 'visitor_id' => $visitor->id,
                 'reservation_id' => $this->reservation->id,
                 'confirmed' => true,

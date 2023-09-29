@@ -69,6 +69,9 @@ class SejourConfirmed extends Component implements HasForms, HasInfolists
                                     ->date(),
                                 TextEntry::make('departure_date')
                                     ->label("Date de départ"),
+                                TextEntry::make('profile.name'),
+                                TextEntry::make('profile.price')
+                                    ->money('eur'),
                             ]),
 
                     ])

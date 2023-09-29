@@ -83,6 +83,10 @@ class SejourResource extends Resource
                 Tables\Columns\TextColumn::make('departure_date')
                     ->date()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('room.name'),
+                Tables\Columns\TextColumn::make('profile.price')
+                    ->label("Prix choisi")
+                    ->money('eur'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
