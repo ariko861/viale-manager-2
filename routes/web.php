@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\SejourConfirmed;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\VisitorForm;
 
@@ -19,5 +20,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/confirmation/{link_token}', VisitorForm::class)->name('confirmation');
+
+Route::get('/confirmed/{link_token}', SejourConfirmed::class)->name('confirmed');
 
 //Route::middleware('confirmationLinkIsValid')->get('/confirmation', [ ConfirmationController::class, 'showConfirmationForm'])->name('confirmation');

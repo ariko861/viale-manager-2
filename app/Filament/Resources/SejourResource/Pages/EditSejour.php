@@ -17,4 +17,11 @@ class EditSejour extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+//    protected function mutateFormDataBeforeFill(array $data): array
+//    {
+//        $data['reservation']['link'] = auth()->id();
+//
+//        return $data;
+//    }
 }
