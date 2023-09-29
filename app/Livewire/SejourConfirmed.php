@@ -38,6 +38,7 @@ class SejourConfirmed extends Component implements HasForms, HasInfolists
     public function reservationInfolist(Infolist $infolist): Infolist
     {
 
+//        dd($this->reservation->sejours);
 
         return $infolist
             ->record($this->reservation)
@@ -46,39 +47,33 @@ class SejourConfirmed extends Component implements HasForms, HasInfolists
                     ->schema([
                         RepeatableEntry::make('sejours')
                             ->label("Séjours")
+                            ->columns(2)
                             ->schema([
-                                Section::make('Visite')
-                                    ->icon('heroicon-o-user')
-                                    ->schema([
-                                        Fieldset::make('Personne')->schema([
-                                            TextEntry::make('visitor.nom')
-                                                ->label("Nom"),
-                                            TextEntry::make('visitor.prenom')
-                                                ->label("Prénom"),
-                                            TextEntry::make('visitor.date_de_naissance')
-                                                ->label("Date de naissance")
-                                                ->date(),
-                                            TextEntry::make('visitor.email')
-                                                ->icon('heroicon-m-envelope')
-                                                ->label("Email"),
-                                            TextEntry::make('visitor.phone')
-                                                ->icon('heroicon-m-phone')
-                                                ->label("Numéro de téléphone"),
-                                        ]),
-                                        Fieldset::make('Séjour')->schema([
-                                            TextEntry::make('arrival_date')
-                                                ->label("Date d'arrivée")
-                                                ->date(),
-                                            TextEntry::make('departure_date')
-                                                ->label("Date de départ")
-                                                ->date(),
-                                        ]),
-                                    ]),
 
-                            ])
+                                TextEntry::make('visitor.nom')
+                                    ->label("Nom"),
+                                TextEntry::make('visitor.prenom')
+                                    ->label("Prénom"),
+                                TextEntry::make('visitor.date_de_naissance')
+                                    ->label("Date de naissance")
+                                    ->date(),
+                                TextEntry::make('visitor.email')
+                                    ->icon('heroicon-m-envelope')
+                                    ->label("Email"),
+                                TextEntry::make('visitor.phone')
+                                    ->icon('heroicon-m-phone')
+                                    ->label("Numéro de téléphone"),
+//                                        ]),
+                                TextEntry::make('arrival_date')
+                                    ->label("Date d'arrivée")
+                                    ->date(),
+                                TextEntry::make('departure_date')
+                                    ->label("Date de départ"),
+                            ]),
+
+                    ])
 //                            ->columns(2)
-                    ]),
-            ]);
+        ]);
     }
 
     public function render()
