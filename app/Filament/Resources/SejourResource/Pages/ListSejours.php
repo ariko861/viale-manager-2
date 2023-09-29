@@ -4,9 +4,19 @@ namespace App\Filament\Resources\SejourResource\Pages;
 
 use App\Filament\Resources\SejourResource;
 use App\Models\Reservation;
+use App\Models\Sejour;
+use Carbon\Carbon;
 use Filament\Actions;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Tables;
+use Filament\Resources\Pages\ListRecords\Tab;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Blade;
+use Livewire\Attributes\On;
+use Livewire\Livewire;
 
 class ListSejours extends ListRecords
 {
@@ -14,6 +24,109 @@ class ListSejours extends ListRecords
     protected static string $view = 'filament.resources.sejours.pages.list-sejours';
 
     public string $lien_reservation = "";
+
+    public $update;
+
+    public function getTabs(): array
+    {
+        return [
+            'tous' => Tab::make(),
+            "Aujourd hui" => Tab::make()
+                ->badge(fn() => Sejour::where('confirmed', true)->presents()->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->presents()),
+            'futures arrivées' => Tab::make()
+                ->badge(fn() => Sejour::where('confirmed', true)->futurArrivals()->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->futurArrivals()),
+
+        ];
+    }
+
+
+    public function table(Tables\Table $table): Tables\Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('visitor.nom')
+                    ->label("Nom")
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('visitor.prenom')
+                    ->label("Prénom")
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('confirmed')
+                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('remove_from_stats'),
+                Tables\Columns\TextColumn::make('arrival_date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('departure_date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('room.name'),
+                Tables\Columns\TextColumn::make('profile.price')
+                    ->label("Prix choisi")
+                    ->money('eur'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('arrival_date')
+            ->groups([
+                Tables\Grouping\Group::make('reservation.id')
+                    ->label("Réservation")
+                    ->getDescriptionFromRecordUsing(function(Sejour $record): ?string {
+                        return $record->getRemarques();
+                    }),
+            ])
+//            ->defaultGroup('reservation.id')
+            ->filters([
+                //
+                Tables\Filters\Filter::make('remove_past')
+                    ->label("Ne pas afficher les séjours passés")
+                    ->toggle()
+                    ->query(fn (Builder $query): Builder => $query->scopes('withoutPast'))
+                    ->default(),
+                Tables\Filters\Filter::make('confirmed')
+                    ->label("Confirmés uniquement")
+                    ->query(fn (Builder $query): Builder => $query->confirmed())
+                    ->toggle(),
+
+            ])
+            ->actions([
+                Tables\Actions\Action::make('select_room')
+//                    ->visible(fn(Sejour $record) => !$record->room()->exists() )
+                    ->color('info')
+                    ->iconButton()
+                    ->icon('heroicon-o-home')
+                    ->action(function (Sejour $record) {
+                        $startDate = $record->arrival_date;
+                        $endDate = $record->departure_date;
+                        $this->dispatch('select-room', [$startDate, $endDate, $record->id]);
+                    }),
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->emptyStateActions([
+                Tables\Actions\CreateAction::make(),
+            ]);
+    }
+
+    #[On('refresh')]
+    public function refresh()
+    {
+        $this->update = !$this->update;
+    }
 
     protected function getHeaderActions(): array
     {
@@ -42,4 +155,11 @@ class ListSejours extends ListRecords
                 })
         ];
     }
+
+    public function getFooter(): ?View
+    {
+        return view('rooms-occupation');
+
+    }
+
 }

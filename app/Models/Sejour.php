@@ -41,6 +41,17 @@ class Sejour extends Model
         return $this->hasMany(self::class, 'reservation_id', 'reservation_id');
     }
 
+    public function getNuitsAttribute(): int
+    {
+        $arrival_date = Carbon::parse($this->arrival_date);
+        $departure_date = Carbon::parse($this->departure_date);
+        return $departure_date->diffInDays($arrival_date);
+    }
+
+    public function getTotalPriceAttribute(): float
+    {
+        return $this->nuits * ($this->profile?->price ?? 0 );
+    }
     public function getRemarques(): ?string
     {
         $remarques_visiteurs = $this->reservation?->remarques_visiteur ?? "Pas de remarque";
@@ -59,4 +70,19 @@ class Sejour extends Model
                     ->orWhereNull('departure_date');
             });
     }
+
+    public function scopePresents(Builder $query): void {
+        $query->withinDates(today(), today());
+    }
+
+    public function scopeFuturArrivals(Builder $query, ?Carbon $date = null): void {
+        if (!$date) $date = today();
+        $query->where('arrival_date', '>=', $date);
+    }
+
+    public function scopeConfirmed(Builder $query): void {
+        $query->where('confirmed', true);
+    }
+
+
 }

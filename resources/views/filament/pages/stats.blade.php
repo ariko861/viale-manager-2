@@ -1,5 +1,4 @@
 <x-filament-panels::page>
 
-    <livewire:sejour-calendar/>
-
+    {{$this->table}}
 </x-filament-panels::page>

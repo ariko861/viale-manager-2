@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SejourResource\Pages;
 use App\Filament\Resources\SejourResource\RelationManagers;
+use App\Livewire\RoomsOccupation;
 use App\Models\Reservation;
 use App\Models\Sejour;
 use App\Models\Visitor;
@@ -115,6 +116,7 @@ class SejourResource extends Resource
 
             ])
             ->actions([
+                Tables\Actions\Action::make('select_room'),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
@@ -127,6 +129,13 @@ class SejourResource extends Resource
                 Tables\Actions\CreateAction::make(),
             ]);
     }
+
+    public function openRoomModal()
+    {
+        $this->dispatch('select-room');
+    }
+
+
 
     public static function getRelations(): array
     {

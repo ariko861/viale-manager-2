@@ -3,14 +3,18 @@
 namespace App\Livewire;
 
 use App\Models\Room;
+use App\Models\Sejour;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class RoomsOccupation extends Component implements HasTable, HasForms
@@ -20,6 +24,7 @@ class RoomsOccupation extends Component implements HasTable, HasForms
     use InteractsWithTable;
     public Carbon $startDate;
     public Carbon $endDate;
+    public int $sejourId;
 
     public function table(Table $table): Table
     {
@@ -39,6 +44,7 @@ class RoomsOccupation extends Component implements HasTable, HasForms
                     ->listWithLineBreaks()
 
             ])
+
             ->groups([
                 Group::make('house.name')
                     ->label("Maison"),
@@ -49,7 +55,15 @@ class RoomsOccupation extends Component implements HasTable, HasForms
                 // ...
             ])
             ->actions([
-                // ...
+                Action::make('choose_room')
+                    ->label("Choisir cette chambre")
+                    ->action(function(Room $record) {
+                        $sejour = Sejour::find($this->sejourId);
+                        $sejour->room_id = $record->id;
+                        $sejour->save();
+                        $this->dispatch('refresh');
+                        $this->dispatch('close-modal', id: 'select-sejour-room');
+                    } ),
             ])
             ->bulkActions([
                 // ...
@@ -57,9 +71,18 @@ class RoomsOccupation extends Component implements HasTable, HasForms
     }
 
     public function mount(){
-        if (!$this->startDate) $this->startDate = today();
-        if (!$this->endDate) $this->endDate = today();
+        $this->startDate = today();
+        $this->endDate = today();
 
+    }
+
+    #[On('select-room')]
+    public function updateRoomOccupation(array $dates)
+    {
+        $this->startDate = Carbon::parse($dates[0]) ?? today();
+        $this->endDate = Carbon::parse($dates[1]) ?? today();
+        $this->sejourId = $dates[2] ?? 0;
+        $this->dispatch('open-modal', id: 'select-sejour-room');
     }
 
     public function render()
