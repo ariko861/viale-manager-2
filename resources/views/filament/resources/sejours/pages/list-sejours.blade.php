@@ -45,7 +45,12 @@
             Un nouveau lien de réservation à transmettre
         </x-slot>
 
-        <span id="lien-reservation">{{$this->lien_reservation}}</span>
+        <x-filament::link
+            id="lien-reservation"
+            icon="heroicon-o-clipboard"
+        >
+            {{$this->lien_reservation}}
+        </x-filament::link>
 
         {{-- Modal content --}}
     </x-filament::modal>
