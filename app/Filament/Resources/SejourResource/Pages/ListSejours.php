@@ -11,7 +11,7 @@ use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
-use Filament\Resources\Pages\ListRecords\Tab;
+use Filament\Resources\Components\Tab;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
@@ -31,9 +31,14 @@ class ListSejours extends ListRecords
     {
         return [
             'tous' => Tab::make(),
-            "Aujourd hui" => Tab::make()
+            "Présents aujourd hui" => Tab::make()
                 ->badge(fn() => Sejour::where('confirmed', true)->presents()->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->presents()),
+                ->modifyQueryUsing(fn (Builder $query) => $query->presents())
+            ,
+            "Arrivent aujourd hui" => Tab::make()
+                ->badge(fn() => Sejour::where('confirmed', true)->where('arrival_date', today())->count())
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('arrival_date', today()))
+            ,
             'futures arrivées' => Tab::make()
                 ->badge(fn() => Sejour::where('confirmed', true)->futurArrivals()->count())
                 ->modifyQueryUsing(fn (Builder $query) => $query->futurArrivals()),
