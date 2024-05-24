@@ -27,18 +27,32 @@ class Stats extends Page implements HasForms, HasTable
         $today = today();
         $beginOfYear = $today->copy()->firstOfYear();
         $endOfYear = $today->copy()->lastOfYear();
+        $sejoursQuery = Sejour::query()->withinDates($beginOfYear, $endOfYear)->confirmed()->inStats();
         return $table
-            ->query(Sejour::query()->withinDates($beginOfYear, $endOfYear)->confirmed())
+            ->query($sejoursQuery)
             ->columns([
                 TextColumn::make('visitor.nom'),
                 TextColumn::make('visitor.prenom'),
                 TextColumn::make('profile.price')
                     ->money('eur'),
                 TextColumn::make('nuits')
-                    ->numeric(),
+                    ->numeric()
+                    ->summarize(Summarizer::make()
+                        ->label("Total des nuitées")
+                        ->using(function() use ($sejoursQuery) : int {
+                            return $sejoursQuery->get()->sum('nuits');
+                        }),
+                    ),
                 TextColumn::make('total_price')
                     ->label("Coût du séjour")
                     ->money('eur')
+                    ->summarize(Summarizer::make()
+                        ->label("Total des revenus")
+                        ->using(function() use ($sejoursQuery) : int {
+                            return $sejoursQuery->get()->sum('total_price');
+                        })
+                        ->money('eur')
+                    )
 
 
             ])

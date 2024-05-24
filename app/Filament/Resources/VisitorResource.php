@@ -52,7 +52,8 @@ class VisitorResource extends Resource
                     ->date()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('confirmed')
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')

@@ -46,6 +46,9 @@ class ListSejours extends ListRecords
     {
         return $table
             ->columns([
+                Tables\Columns\ColorColumn::make('reservation')
+                    ->state(fn(Sejour $record) => $record->reservation->getColor())
+                ,
                 Tables\Columns\TextColumn::make('visitor.nom')
                     ->label("Nom")
                     ->searchable()
@@ -54,14 +57,14 @@ class ListSejours extends ListRecords
                     ->label("Prénom")
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('confirmed')
-                    ->boolean(),
-                Tables\Columns\ToggleColumn::make('remove_from_stats'),
+                Tables\Columns\ToggleColumn::make('confirmed'),
+//                Tables\Columns\ToggleColumn::make('remove_from_stats'),
                 Tables\Columns\TextColumn::make('arrival_date')
-                    ->date()
+                    ->label("Date d'arrivée")
+                    ->date('D j F Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('departure_date')
-                    ->date()
+                    ->date('D j F Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('room.name'),
                 Tables\Columns\TextColumn::make('profile.price')

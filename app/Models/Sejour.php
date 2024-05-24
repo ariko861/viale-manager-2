@@ -63,6 +63,15 @@ class Sejour extends Model
         $query->where('departure_date', '>=', Carbon::today())->orWhereNull('departure_date');
     }
 
+    /**
+     *
+     * Récupère les séjours présents entre deux dates
+     *
+     * @param Builder $query
+     * @param Carbon $startDate
+     * @param Carbon $endDate
+     * @return void
+     */
     public function scopeWithinDates(Builder $query, Carbon $startDate, Carbon $endDate): void {
         $query->whereDate('arrival_date', '<=', $endDate)
             ->where(function (Builder $q) use ($startDate){
@@ -82,6 +91,10 @@ class Sejour extends Model
 
     public function scopeConfirmed(Builder $query): void {
         $query->where('confirmed', true);
+    }
+
+    public function scopeInStats(Builder $query): void {
+        $query->where('remove_from_stats', false);
     }
 
 

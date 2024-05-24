@@ -39,6 +39,14 @@ class Reservation extends Model
         return urldecode(route('confirmation', $this->link_token) );// . '?link_token=' . $this->link_token);
     }
 
+    public function getColor(): string {
+        mt_srand($this->id);
+        $red = mt_rand(128, 230);
+        $green = mt_rand(128, 230);
+        $blue = mt_rand(128, 230);
+        return sprintf("#%02x%02x%02x", $red, $green, $blue);
+    }
+
     public static function createQuickReservation(int $max_days_change = 5, int $max_visitors = 5): self
     {
         $newReservation = new self();

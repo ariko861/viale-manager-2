@@ -89,6 +89,7 @@ class CreateReservation extends CreateRecord
                                 ]),
                             Select::make('profile_id')
                                 ->label("Profil de prix")
+                                ->required()
                                 ->relationship('profile', 'name')
                                 ->getOptionLabelFromRecordUsing(fn (Profile $record) => "{$record->name} {$record->euro}"),
                             Select::make('room_id')

@@ -69,6 +69,9 @@ class SejourResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ColorColumn::make('reservation')
+                    ->state(fn(Sejour $record) => $record->reservation->getColor())
+                ,
                 Tables\Columns\TextColumn::make('visitor.nom')
                     ->label("Nom")
                     ->sortable(),
@@ -79,6 +82,7 @@ class SejourResource extends Resource
                     ->boolean(),
                 Tables\Columns\ToggleColumn::make('remove_from_stats'),
                 Tables\Columns\TextColumn::make('arrival_date')
+                    ->label("Date d'arrivée")
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('departure_date')

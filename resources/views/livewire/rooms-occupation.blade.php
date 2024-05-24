@@ -1,6 +1,5 @@
 <div>
     {{-- Do your work, then step back. --}}
-    <button wire:click="$dispatch('select-room')">Test</button>
     <x-filament::modal
                 id="select-sejour-room"
                 width="5xl"
