@@ -51,10 +51,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugin(
                 FilamentFullCalendarPlugin::make()
-                    ->selectable()
-                    ->editable()
+//                    ->selectable()
+//                    ->editable()
 //                    ->timezone('')
                     ->locale('fr')
+//                    ->plugins(['interaction', 'multimonth'])
             )
 //            ->plugin(SpatieLaravelTranslatablePlugin::make()
 //                ->defaultLocales(['en', 'es']),

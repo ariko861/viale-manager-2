@@ -4,12 +4,20 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\SejourResource;
 use App\Models\Sejour;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Form;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
 use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 
 class CalendarWidget extends FullCalendarWidget
 {
+
+    public string|null|\Illuminate\Database\Eloquent\Model $model = Sejour::class;
 
     public function fetchEvents(array $fetchInfo): array
     {
@@ -30,6 +38,7 @@ class CalendarWidget extends FullCalendarWidget
             ->get()
             ->map(
                 fn (Sejour $sejour) => [
+                    'id' => $sejour->id,
                     'title' => $sejour->visitor?->full_name,
                     'start' => $sejour->arrival_date,
                     'end' => $sejour->departure_date,
@@ -42,5 +51,50 @@ class CalendarWidget extends FullCalendarWidget
             )->toArray()
 
             ;
+    }
+
+    public function getFormSchema(): array
+    {
+        return [
+
+            Grid::make()
+                ->schema([
+                    DateTimePicker::make('arrival_date'),
+
+                    DateTimePicker::make('departure_date'),
+                ]),
+        ];
+    }
+
+    protected function modalActions(): array
+    {
+        return [
+            EditAction::make()
+                ->mountUsing(
+                    function (Sejour $record, Form $form, array $arguments) {
+                        $form->fill([
+                            'name' => $record->name,
+                            'starts_at' => $arguments['event']['start'] ?? $record->starts_at,
+                            'ends_at' => $arguments['event']['end'] ?? $record->ends_at
+                        ]);
+                    }
+                ),
+            DeleteAction::make(),
+        ];
+    }
+
+    protected function headerActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->mountUsing(
+                    function (Form $form, array $arguments) {
+                        $form->fill([
+                            'arrival_date' => $arguments['start'] ?? null,
+                            'departure_date' => $arguments['end'] ?? null
+                        ]);
+                    }
+                )
+        ];
     }
 }

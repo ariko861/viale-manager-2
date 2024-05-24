@@ -35,20 +35,30 @@ class SejourResource extends Resource
                     ->relationship('visitor')
                     ->schema([
                         Forms\Components\TextInput::make('nom')
-                            ->required(),
+                            ->required()
+                            ->disabledOn('edit')
+                        ,
                         Forms\Components\TextInput::make('prenom')
-                            ->required(),
+                            ->required()
+                            ->disabledOn('edit')
+                        ,
                     ]),
 
                 Forms\Components\Toggle::make('confirmed')
-                    ->required(),
+                    ->label("Confirmé")
+                ,
                 Forms\Components\Toggle::make('remove_from_stats')
-                    ->required(),
+                    ->label("Retirer des statistiques")
+                ,
                 Forms\Components\Section::make('dates')
+                    ->label("Dates")
                     ->schema([
                         Forms\Components\DatePicker::make('arrival_date')
+                            ->label("Date d'arrivée")
                             ->required(),
-                        Forms\Components\DatePicker::make('departure_date'),
+                        Forms\Components\DatePicker::make('departure_date')
+                            ->label("Date de départ")
+                        ,
                     ]),
                 Forms\Components\Section::make('reservation')
                     ->relationship('reservation')
