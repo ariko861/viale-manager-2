@@ -12,9 +12,12 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
 use Filament\Resources\Components\Tab;
+use Filament\Tables\Columns\Layout\Grid;
+use Filament\Tables\Columns\Layout\Split;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Livewire;
 
@@ -51,38 +54,49 @@ class ListSejours extends ListRecords
     {
         return $table
             ->columns([
+                Split::make([
+
                 Tables\Columns\ColorColumn::make('reservation')
                     ->state(fn(Sejour $record) => $record->reservation->getColor())
                 ,
-                Tables\Columns\TextColumn::make('visitor.nom')
-                    ->label("Nom")
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('visitor.prenom')
-                    ->label("Prénom")
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\Layout\Stack::make([
+
+                    Tables\Columns\TextColumn::make('visitor.nom')
+                        ->label("Nom")
+                        ->formatStateUsing(fn (string $state): string => Str::upper($state))
+                        ->searchable()
+                        ->sortable(),
+                    Tables\Columns\TextColumn::make('visitor.prenom')
+                        ->label("Prénom")
+                        ->searchable()
+                        ->sortable(),
+                ]),
                 Tables\Columns\ToggleColumn::make('confirmed'),
 //                Tables\Columns\ToggleColumn::make('remove_from_stats'),
-                Tables\Columns\TextColumn::make('arrival_date')
-                    ->label("Date d'arrivée")
-                    ->date('D j F Y')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('departure_date')
-                    ->date('D j F Y')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('room.name'),
-                Tables\Columns\TextColumn::make('profile.price')
-                    ->label("Prix choisi")
-                    ->money('eur'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                        Tables\Columns\Layout\Stack::make([
+                            Tables\Columns\TextColumn::make('arrival_date')
+                                ->label("Date d'arrivée")
+                                ->date('D j F Y')
+                                ->sortable(),
+                            Tables\Columns\TextColumn::make('departure_date')
+                                ->label("Date de départ")
+                                ->date('D j F Y')
+                                ->sortable(),
+                        ]),
+                        Tables\Columns\TextColumn::make('room.name'),
+                        Tables\Columns\TextColumn::make('profile.price')
+                            ->label("Prix choisi")
+                            ->money('eur'),
+//                    Tables\Columns\TextColumn::make('created_at')
+//                        ->dateTime()
+//                        ->sortable()
+//                        ->toggleable(isToggledHiddenByDefault: true),
+//                    Tables\Columns\TextColumn::make('updated_at')
+//                        ->dateTime()
+//                        ->sortable()
+//                        ->toggleable(isToggledHiddenByDefault: true),
+                ]),
+
             ])
             ->defaultSort('arrival_date')
             ->groups([

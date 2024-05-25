@@ -53,9 +53,30 @@ class VisitorForm extends Component implements HasForms
         if ($reservation?->authorize_edition) {
             $this->valid_token = true;
             $this->reservation = $reservation;
+            if ($reservation->sejours()->count() > 0){
+                $this->form->fill([
+                    'sejours' => $reservation->sejours->map(function( Sejour $sejour){
+                        return [
+                            "select_visitor" => $sejour->visitor_id,
+                            "nom" => $sejour->visitor?->nom,
+                            "prenom" => $sejour->visitor?->prenom,
+                            "email" => $sejour->visitor?->email,
+                            "date_de_naissance" => $sejour->visitor->date_de_naissance,
+                            "phone" => $sejour->visitor->phone,
+                            "visitor_id" => $sejour->visitor_id,
+                            "sejour_id" => $sejour->id,
+                            "arrival_date" => $sejour->arrival_date,
+                            "departure_date" => $sejour->departure_date,
+                            "profile_id" => $sejour->profile_id,
+                        ];
+                    })->toArray(),
+                    'remarques_visiteur' => $reservation->remarques_visiteur ?? "",
+                ]);
+            }
         } else {
             $this->redirectRoute('confirmed', $link_token);
         }
+
     }
 
     public function form(Form $form): Form
@@ -76,15 +97,18 @@ class VisitorForm extends Component implements HasForms
                                 ->icon('heroicon-o-home')
                                 ->schema($messagesDisplay->toArray()),
                             Step::make('Dates')
+                                ->hidden(fn() => $this->reservation->sejours()->count() > 0)
                                 ->icon("heroicon-o-calendar-days")
                                 ->description('Pour quelles dates cette réservation est prévue ?')
                                 ->schema([
                                     DatePicker::make('arrival_date')
+                                        ->label("Date d'arrivée")
                                         ->required()
                                         ->live()
                                         ->minDate(today())
                                         ->afterStateUpdated(fn ($state) => $this->arrival_date = $state),
                                     DatePicker::make('departure_date')
+                                        ->label("Date de départ")
                                         ->required()
                                         ->minDate($this->arrival_date)
                                         ->afterStateUpdated(fn ($state) => $this->departure_date = $state),
@@ -114,7 +138,7 @@ class VisitorForm extends Component implements HasForms
                                                 ->compact()
                                                 ->schema([
                                                     TextInput::make('email')
-                                                        ->disabled(fn(Get $get) => $get('id') )
+                                                        ->disabled(fn(Get $get) => $get('visitor_id') )
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(function(string $state){
                                                             $this->existing_visitors = Visitor::where('email', $state)->get();
@@ -137,22 +161,23 @@ class VisitorForm extends Component implements HasForms
                                                                 $set('email', $visitor->email );
                                                                 $set('date_de_naissance', $visitor->date_de_naissance );
                                                                 $set('phone', $visitor->phone );
-                                                                $set('id', $visitor->id);
+                                                                $set('visitor_id', $visitor->id);
                                                             } else {
-                                                                $set('id', '');
+                                                                $set('visitor_id', '');
                                                             }
                                                         }),
                                                     TextInput::make('nom')
-                                                        ->disabled(fn(Get $get) => $get('id') )
+                                                        ->disabled(fn(Get $get) => $get('visitor_id') )
                                                         ->required(),
                                                     TextInput::make('prenom')
-                                                        ->disabled(fn(Get $get) => $get('id') )
+                                                        ->disabled(fn(Get $get) => $get('visitor_id') )
                                                         ->required(),
                                                     DatePicker::make('date_de_naissance')
                                                         ->required()
                                                         ->helperText("Même approximative, c'est uniquement votre âge qui nous intéresse"),
                                                     TextInput::make('phone'),
-                                                    Hidden::make('id'),
+                                                    Hidden::make('visitor_id'),
+                                                    Hidden::make('sejour_id'),
                                                 ]),
                                             Section::make('dates')
                                                 ->compact()
@@ -199,14 +224,15 @@ BLADE)))
     public function create(): void
     {
         $data = $this->form->getState();
+//        dd($data);
         $this->reservation->confirmed_at = now();
-        $this->reservation->authorize_edition = false;
+//        $this->reservation->authorize_edition = false;
         $this->reservation->remarques_visiteur = $data["remarques_visiteur"];
-
+//        $this->reservation->sejours()->delete();
         foreach ($data["sejours"] as $sejourData){
             // On commence par créer ou récupérer le visiteur
-            if ($sejourData["id"]){
-                $visitor = Visitor::find($sejourData["id"]);
+            if ($sejourData["visitor_id"]){
+                $visitor = Visitor::find($sejourData["visitor_id"]);
                 if ($sejourData["phone"]) $visitor->phone = $sejourData["phone"];
                 if ($sejourData["date_de_naissance"]) $visitor->phone = $sejourData["date_de_naissance"];
                 $visitor->save();
@@ -221,15 +247,29 @@ BLADE)))
             }
             $profile = Profile::find($sejourData["profile_id"]);
             if (!$profile) $profile = Profile::where('is_default', true)->first();
+
             // Pour ensuite l'assigner au séjour nouvellement créé:
-            $sejour = Sejour::create([
-                'arrival_date' => $sejourData["arrival_date"],
-                'departure_date' => $sejourData["departure_date"],
-                'profile_id' => $profile->id,
-                'visitor_id' => $visitor->id,
-                'reservation_id' => $this->reservation->id,
-                'confirmed' => true,
-            ]);
+            if ($sejourData["sejour_id"]){
+                $sejour = Sejour::find($sejourData["sejour_id"])->update([
+                    'arrival_date' => $sejourData["arrival_date"],
+                    'departure_date' => $sejourData["departure_date"],
+                    'profile_id' => $profile->id,
+//                    'visitor_id' => $visitor->id,
+//                    'reservation_id' => $this->reservation->id,
+                    'confirmed' => true,
+                ]);
+
+            } else {
+                $sejour = Sejour::create([
+                    'arrival_date' => $sejourData["arrival_date"],
+                    'departure_date' => $sejourData["departure_date"],
+                    'profile_id' => $profile->id,
+                    'visitor_id' => $visitor->id,
+                    'reservation_id' => $this->reservation->id,
+                    'confirmed' => true,
+                ]);
+            }
+
         }
         $this->reservation->save();
         $this->redirectRoute('confirmed', $this->reservation->link_token);

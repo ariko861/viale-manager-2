@@ -52,7 +52,9 @@ class RoomResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('house.name')
-                    ->sortable(),
+                    ->sortable()
+                    ->icon('heroicon-o-home')
+                ,
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('beds')

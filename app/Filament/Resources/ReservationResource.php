@@ -17,10 +17,9 @@ class ReservationResource extends Resource
 {
     protected static ?string $model = Reservation::class;
 
-//    public static function getEloquentQuery(): Builder
-//    {
-//        return parent::getEloquentQuery()->scopes(['isConfirmed']);
-//    }
+    protected static bool $shouldRegisterNavigation = false;
+
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form

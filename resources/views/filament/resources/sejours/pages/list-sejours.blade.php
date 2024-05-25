@@ -48,6 +48,7 @@
         <x-filament::link
             id="lien-reservation"
             icon="heroicon-o-clipboard"
+            href="{{$this->lien_reservation}}"
         >
             {{$this->lien_reservation}}
         </x-filament::link>
