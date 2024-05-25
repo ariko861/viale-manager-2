@@ -11,6 +11,7 @@ use App\Models\Visitor;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
@@ -119,6 +120,7 @@ class VisitorForm extends Component implements HasForms
                                 ->description("Quelles seront les personnes présentes dans ce groupe ?")
                                 ->schema([
                                     Repeater::make('sejours')
+                                        ->itemLabel(fn (array $state): ?string => $state['nom']." ".$state['prenom'] ?? null)
 //                                        ->relationship("sejours")
                                         ->label("Personnes")
                                         ->required()
@@ -133,11 +135,15 @@ class VisitorForm extends Component implements HasForms
                                                 ->icon('heroicon-o-user');
                                         })
                                         ->schema([
-                                            Section::make("Visiteur")
-                                                ->icon('heroicon-m-user-plus')
-                                                ->compact()
+                                            Fieldset::make("Visiteur")
+                                                ->columns(2)
+//                                                ->('heroicon-m-user-plus')
+//                                                ->compact()
                                                 ->schema([
                                                     TextInput::make('email')
+                                                        ->columnSpanFull()
+                                                        ->prefixIcon('heroicon-o-envelope')
+                                                        ->hint("Commencez par saisir une adresse email")
                                                         ->disabled(fn(Get $get) => $get('visitor_id') )
                                                         ->live(onBlur: true)
                                                         ->afterStateUpdated(function(string $state){
@@ -146,9 +152,11 @@ class VisitorForm extends Component implements HasForms
                                                         })
                                                         ->email(),
                                                     Select::make('select_visitor')
+                                                        ->columnSpanFull()
                                                         ->label("Personnes existantes avec cet email")
                                                         ->helperText("Nous avons trouvé cet email dans notre base de données, veuillez vérifier que vous êtes dans cette liste")
                                                         ->visible(fn() => $this->existing_visitors?->count() > 0)
+                                                        ->prefixIcon('heroicon-o-user')
                                                         ->options(fn() => $this->existing_visitors?->mapWithKeys(function ($visitor){
                                                             return [$visitor->id => $visitor->full_name];
                                                         }) )
@@ -167,21 +175,33 @@ class VisitorForm extends Component implements HasForms
                                                             }
                                                         }),
                                                     TextInput::make('nom')
+                                                        ->prefixIcon("heroicon-o-identification")
                                                         ->disabled(fn(Get $get) => $get('visitor_id') )
+                                                        ->live()
                                                         ->required(),
                                                     TextInput::make('prenom')
+                                                        ->prefixIcon("heroicon-s-identification")
                                                         ->disabled(fn(Get $get) => $get('visitor_id') )
+                                                        ->live()
                                                         ->required(),
                                                     DatePicker::make('date_de_naissance')
+                                                        ->prefixIcon("heroicon-o-calendar-days")
                                                         ->required()
-                                                        ->helperText("Même approximative, c'est uniquement votre âge qui nous intéresse"),
-                                                    TextInput::make('phone'),
+                                                        ->helperText("Nous sommes surtout intéressés par votre âge")
+                                                    ,
+                                                    TextInput::make('phone')
+                                                        ->prefixIcon('heroicon-o-phone')
+                                                    ,
                                                     Hidden::make('visitor_id'),
                                                     Hidden::make('sejour_id'),
                                                 ]),
                                             Section::make('dates')
                                                 ->compact()
                                                 ->description("Vous pouvez changer les dates individuellement")
+                                                ->icon('heroicon-o-calendar')
+                                                ->compact()
+                                                ->aside()
+                                                ->columns(2)
                                                 ->collapsed()
                                                 ->schema([
                                                     DatePicker::make('arrival_date')
@@ -193,6 +213,7 @@ class VisitorForm extends Component implements HasForms
                                                 ]),
                                             Select::make('profile_id')
                                                 ->label("Profil de prix")
+                                                ->prefixIcon('heroicon-o-currency-euro')
                                                 ->required()
 //                                                ->relationship('profile', 'name')
                                                 ->options(fn() => Profile::all()->mapWithKeys(function($profile) {
