@@ -87,11 +87,14 @@ class CreateReservation extends CreateRecord
                                         ->live()
                                         ->default($this->no_departure_date),
                                 ]),
-                            Select::make('profile_id')
+                            Select::make('price')
                                 ->label("Profil de prix")
                                 ->required()
-                                ->relationship('profile', 'name')
-                                ->getOptionLabelFromRecordUsing(fn (Profile $record) => "{$record->name} {$record->euro}"),
+                                ->prefixIcon('heroicon-o-currency-euro')
+                                ->options(Profile::all()->mapWithKeys(function(Profile $profile){
+                                    return [$profile->price => $profile->name." ".$profile->euro ];
+                                }))
+                            ,
                             Select::make('room_id')
                                 ->label("Chambre")
                                 ->relationship('room', 'name')

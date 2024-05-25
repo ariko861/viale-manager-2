@@ -104,7 +104,7 @@ class ListSejours extends ListRecords
                                 ->sortable(),
                         ]),
                         Tables\Columns\TextColumn::make('room.name'),
-                        Tables\Columns\TextColumn::make('profile.price')
+                        Tables\Columns\TextColumn::make('price')
                             ->label("Prix choisi")
                             ->money('eur'),
 //                    Tables\Columns\TextColumn::make('created_at')

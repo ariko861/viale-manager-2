@@ -12,10 +12,6 @@ class Profile extends Model
 
     protected $fillable = ["name", "price", "remarques", "is_default"];
 
-    public function sejours(): HasMany
-    {
-        return $this->hasMany(Sejour::class);
-    }
 
     public function getEuroAttribute()
     {

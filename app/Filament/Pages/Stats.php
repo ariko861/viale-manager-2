@@ -33,7 +33,7 @@ class Stats extends Page implements HasForms, HasTable
             ->columns([
                 TextColumn::make('visitor.nom'),
                 TextColumn::make('visitor.prenom'),
-                TextColumn::make('profile.price')
+                TextColumn::make('price')
                     ->money('eur'),
                 TextColumn::make('nuits')
                     ->numeric()

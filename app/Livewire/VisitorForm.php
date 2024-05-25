@@ -211,13 +211,13 @@ class VisitorForm extends Component implements HasForms
                                                         ->required()
                                                         ->default($this->departure_date),
                                                 ]),
-                                            Select::make('profile_id')
+                                            Select::make('price')
                                                 ->label("Profil de prix")
                                                 ->prefixIcon('heroicon-o-currency-euro')
                                                 ->required()
 //                                                ->relationship('profile', 'name')
                                                 ->options(fn() => Profile::all()->mapWithKeys(function($profile) {
-                                                    return [$profile->id => $profile->name. " ".$profile->euro];
+                                                    return [$profile->price => $profile->name. " ".$profile->euro];
                                                 })),
                                         ])
                                 ]),
@@ -274,7 +274,7 @@ BLADE)))
                 $sejour = Sejour::find($sejourData["sejour_id"])->update([
                     'arrival_date' => $sejourData["arrival_date"],
                     'departure_date' => $sejourData["departure_date"],
-                    'profile_id' => $profile->id,
+                    'price' => $profile->price,
 //                    'visitor_id' => $visitor->id,
 //                    'reservation_id' => $this->reservation->id,
                     'confirmed' => true,
@@ -284,7 +284,7 @@ BLADE)))
                 $sejour = Sejour::create([
                     'arrival_date' => $sejourData["arrival_date"],
                     'departure_date' => $sejourData["departure_date"],
-                    'profile_id' => $profile->id,
+                    'price' => $profile->price,
                     'visitor_id' => $visitor->id,
                     'reservation_id' => $this->reservation->id,
                     'confirmed' => true,
@@ -296,21 +296,6 @@ BLADE)))
         $this->redirectRoute('confirmed', $this->reservation->link_token);
     }
 
-//    public function selectVisitor()
-//    {
-//        $visitor = Visitor::find($this->selected_visitor_id);
-//        $this->form->fill(['sejours' => [
-//                0 => [
-//                    'nom' => $visitor->nom,
-//                    'prenom' => $visitor->prenom,
-//                    'email' => $visitor->email,
-//                    'date_de_naissance' => $visitor->date_de_naissance,
-//                    'phone' => $visitor->phone,
-//                ]
-//            ]
-//        ]);
-//        $this->dispatch('close-modal', id: 'select-existing-visitor');
-//    }
 
     public function render()
     {

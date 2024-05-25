@@ -9,6 +9,7 @@ use App\Models\Reservation;
 use App\Models\Sejour;
 use App\Models\Visitor;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -31,8 +32,13 @@ class SejourResource extends Resource
         return $form
             ->schema([
 
-                Forms\Components\Section::make('visitor')
+                Forms\Components\Section::make('Visiteur')
+//                    ->label("Visiteur")
+                    ->aside()
+                    ->icon('heroicon-o-user')
                     ->relationship('visitor')
+                    ->compact()
+                    ->columns(2)
                     ->schema([
                         Forms\Components\TextInput::make('nom')
                             ->required()
@@ -43,15 +49,30 @@ class SejourResource extends Resource
                             ->disabledOn('edit')
                         ,
                     ]),
-
-                Forms\Components\Toggle::make('confirmed')
-                    ->label("Confirmé")
-                ,
-                Forms\Components\Toggle::make('remove_from_stats')
-                    ->label("Retirer des statistiques")
-                ,
+                Forms\Components\Section::make('Détails')
+                    ->aside()
+                    ->icon('heroicon-o-clipboard-document-list')
+                    ->columns(2)
+                    ->compact()
+                    ->schema([
+                        TextInput::make('price')
+                            ->numeric()
+                            ->prefixIcon('heroicon-o-currency-euro')
+                            ->columnSpanFull()
+                        ,
+                        Forms\Components\Toggle::make('confirmed')
+                            ->label("Confirmé")
+                        ,
+                        Forms\Components\Toggle::make('remove_from_stats')
+                            ->label("Retirer des statistiques")
+                        ,
+                    ]),
                 Forms\Components\Section::make('dates')
                     ->label("Dates")
+                    ->icon('heroicon-o-calendar')
+                    ->compact()
+                    ->aside()
+                    ->columns(2)
                     ->schema([
                         Forms\Components\DatePicker::make('arrival_date')
                             ->label("Date d'arrivée")
