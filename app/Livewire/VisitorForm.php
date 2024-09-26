@@ -266,15 +266,15 @@ BLADE)))
                     'email' => $sejourData["email"]
                 ]);
             }
-            $profile = Profile::find($sejourData["profile_id"]);
-            if (!$profile) $profile = Profile::where('is_default', true)->first();
+            $price = $sejourData["price"];
+//            if (!$price) $price = Profile::where('is_default', true)->first()->price;
 
             // Pour ensuite l'assigner au séjour nouvellement créé:
             if ($sejourData["sejour_id"]){
                 $sejour = Sejour::find($sejourData["sejour_id"])->update([
                     'arrival_date' => $sejourData["arrival_date"],
                     'departure_date' => $sejourData["departure_date"],
-                    'price' => $profile->price,
+                    'price' => $price,
 //                    'visitor_id' => $visitor->id,
 //                    'reservation_id' => $this->reservation->id,
                     'confirmed' => true,
@@ -284,7 +284,7 @@ BLADE)))
                 $sejour = Sejour::create([
                     'arrival_date' => $sejourData["arrival_date"],
                     'departure_date' => $sejourData["departure_date"],
-                    'price' => $profile->price,
+                    'price' => $price,
                     'visitor_id' => $visitor->id,
                     'reservation_id' => $this->reservation->id,
                     'confirmed' => true,
