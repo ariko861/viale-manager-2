@@ -87,15 +87,7 @@ class CalendarWidget extends FullCalendarWidget
     protected function headerActions(): array
     {
         return [
-            CreateAction::make()
-                ->mountUsing(
-                    function (Form $form, array $arguments) {
-                        $form->fill([
-                            'arrival_date' => $arguments['start'] ?? null,
-                            'departure_date' => $arguments['end'] ?? null
-                        ]);
-                    }
-                )
+
         ];
     }
 }
