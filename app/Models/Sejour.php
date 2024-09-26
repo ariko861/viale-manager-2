@@ -72,7 +72,7 @@ class Sejour extends Model
      * @param Carbon $endDate
      * @return void
      */
-    public function scopeWithinDates(Builder $query, Carbon $startDate, Carbon $endDate): void {
+    public function scopeWithinDates(Builder $query, Carbon|string $startDate, Carbon|string $endDate): void {
         $query->whereDate('arrival_date', '<=', $endDate)
             ->where(function (Builder $q) use ($startDate){
                 $q->whereDate('departure_date', '>=', $startDate)

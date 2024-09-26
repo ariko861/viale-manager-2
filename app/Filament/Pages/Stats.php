@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Models\Sejour;
+use Carbon\Carbon;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
@@ -11,8 +13,9 @@ use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class Stats extends Page implements HasForms, HasTable
 {
@@ -27,7 +30,7 @@ class Stats extends Page implements HasForms, HasTable
         $today = today();
         $beginOfYear = $today->copy()->firstOfYear();
         $endOfYear = $today->copy()->lastOfYear();
-        $sejoursQuery = Sejour::query()->withinDates($beginOfYear, $endOfYear)->confirmed()->inStats();
+        $sejoursQuery = Sejour::query()->confirmed()->inStats();
         return $table
             ->query($sejoursQuery)
             ->columns([
@@ -38,9 +41,9 @@ class Stats extends Page implements HasForms, HasTable
                 TextColumn::make('nuits')
                     ->numeric()
                     ->summarize(Summarizer::make()
-                        ->label("Total des nuitées")
-                        ->using(function() use ($sejoursQuery) : int {
-                            return $sejoursQuery->get()->sum('nuits');
+                        ->label("Total des nuitées sur année en cours")
+                        ->using(function(Table $table): int {
+                            return $this->getFilteredTableQuery()->get()->sum('nuits');
                         }),
                     ),
                 TextColumn::make('total_price')
@@ -49,7 +52,7 @@ class Stats extends Page implements HasForms, HasTable
                     ->summarize(Summarizer::make()
                         ->label("Total des revenus")
                         ->using(function() use ($sejoursQuery) : int {
-                            return $sejoursQuery->get()->sum('total_price');
+                            return $this->getFilteredTableQuery()->get()->sum('total_price');
                         })
                         ->money('eur')
                     )
@@ -57,7 +60,36 @@ class Stats extends Page implements HasForms, HasTable
 
             ])
             ->filters([
-                // ...
+                Filter::make('dates')
+                    ->form([
+                        DatePicker::make('from')
+                            ->label("Depuis")
+                            ->default($beginOfYear)
+                        ,
+                        DatePicker::make('until')
+                            ->label("Jusque")
+                            ->default($endOfYear)
+                        ,
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['from'] && $data['until'],
+                                fn(Builder $query, $date): Builder => $query->withinDates($data['from'], $data['until']),
+                            );
+//                            ->when(
+//                                $data['until'],
+//                                fn(Builder $query, $date): Builder => $query->whereDate('arrival_date', '<=', $date),
+//                            );
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if (! $data['from'] || !$data['until']) {
+                            return null;
+                        }
+
+                        return 'Entre le ' . Carbon::parse($data['from'])->toFormattedDateString() . ' et le ' . Carbon::parse($data['until'])->toFormattedDateString();
+                    })
+                ,
             ])
             ->actions([
                 // ...

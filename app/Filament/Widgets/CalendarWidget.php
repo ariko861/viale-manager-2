@@ -20,6 +20,19 @@ class CalendarWidget extends FullCalendarWidget
 
     public string|null|\Illuminate\Database\Eloquent\Model $model = Sejour::class;
 
+    public function config(): array
+    {
+        return [
+            'firstDay' => 1,
+            'headerToolbar' => [
+                'left' => 'dayGridWeek,dayGridDay,dayGridMonth',
+                'center' => 'title',
+                'right' => 'prev,next today',
+            ],
+            'initialView' => 'dayGridWeek'
+        ];
+    }
+
     public function fetchEvents(array $fetchInfo): array
     {
         // You can use $fetchInfo to filter events by date.
