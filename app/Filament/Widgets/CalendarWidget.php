@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\SejourResource;
 use App\Models\Sejour;
+use Carbon\Carbon;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -40,8 +41,8 @@ class CalendarWidget extends FullCalendarWidget
                 fn (Sejour $sejour) => [
                     'id' => $sejour->id,
                     'title' => $sejour->visitor?->full_name,
-                    'start' => $sejour->arrival_date,
-                    'end' => $sejour->departure_date,
+                    'start' => $sejour->arrival_date->format('Y-m-d'),
+                    'end' => $sejour->departure_date->addDay()->format('Y-m-d'),
                     'url' => SejourResource::getUrl(name: 'view', parameters: ['record' => $sejour]),
                     'shouldOpenUrlInNewTab' => true,
                     'borderColor' => $sejour->confirmed ? 'green' : 'red',

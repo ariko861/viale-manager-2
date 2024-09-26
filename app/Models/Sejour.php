@@ -16,6 +16,11 @@ class Sejour extends Model
 
     protected $fillable = ["reservation_id", "visitor_id", "price", "confirmed", "remove_from_stats", "arrival_date", "departure_date", "remarques_visiteur", "remarques_accueil"];
 
+    protected $casts = [
+        'arrival_date' => 'date:Y-m-d',
+        'departure_date' => 'date:Y-m-d',
+    ];
+
     public function reservation(): BelongsTo
     {
         return $this->belongsTo(Reservation::class);

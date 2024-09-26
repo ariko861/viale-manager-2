@@ -60,6 +60,11 @@ class AdminPanelProvider extends PanelProvider
 //            ->plugin(SpatieLaravelTranslatablePlugin::make()
 //                ->defaultLocales(['en', 'es']),
 //            )
+
+            ->navigationGroups([
+                'Accueil',
+                'Configuration'
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
