@@ -29,7 +29,7 @@ class Room extends Model
         }
     }
 
-    public function sejours(?Carbon $startDate, ?Carbon $endDate): HasMany
+    public function sejours(?Carbon $startDate = null, ?Carbon $endDate = null): HasMany
     {
         if (!$startDate) $startDate = today();
         if (!$endDate) $endDate = today();
