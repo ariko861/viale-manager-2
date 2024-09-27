@@ -27,7 +27,7 @@ class MessageResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('title')
                     ->required(),
-                Forms\Components\Textarea::make('message')
+                Forms\Components\RichEditor::make('message')
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\Select::make('type')
@@ -43,7 +43,9 @@ class MessageResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('message')
-                    ->searchable(),
+                    ->searchable()
+                    ->html()
+                ,
                 Tables\Columns\TextColumn::make('type')
                     ->searchable(),
             ])

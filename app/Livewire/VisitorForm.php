@@ -84,7 +84,7 @@ class VisitorForm extends Component implements HasForms
     {
         $messages = Message::where('type', MessageTypes::Link)->get();
         $messagesDisplay = $messages->map(function(Message $item, $index){
-            return Placeholder::make($item->title)->content($item->message);
+            return Placeholder::make($item->title)->content(fn() => new HtmlString($item->message));
         });
         return $form
             ->schema([
@@ -111,7 +111,8 @@ class VisitorForm extends Component implements HasForms
                                     DatePicker::make('departure_date')
                                         ->label("Date de départ")
                                         ->required()
-                                        ->minDate($this->arrival_date)
+                                        ->live()
+                                        ->minDate(fn() => $this->arrival_date)
                                         ->afterStateUpdated(fn ($state) => $this->departure_date = $state),
                                 ])
                                 ->columns(2),
@@ -206,9 +207,12 @@ class VisitorForm extends Component implements HasForms
                                                 ->schema([
                                                     DatePicker::make('arrival_date')
                                                         ->required()
+                                                        ->live()
+                                                        ->minDate(today())
                                                         ->default($this->arrival_date),
                                                     DatePicker::make('departure_date')
                                                         ->required()
+                                                        ->minDate(fn(Get $get) => $get('arrival_date'))
                                                         ->default($this->departure_date),
                                                 ]),
                                             Select::make('price')
@@ -255,7 +259,7 @@ BLADE)))
             if ($sejourData["visitor_id"]){
                 $visitor = Visitor::find($sejourData["visitor_id"]);
                 if ($sejourData["phone"]) $visitor->phone = $sejourData["phone"];
-                if ($sejourData["date_de_naissance"]) $visitor->phone = $sejourData["date_de_naissance"];
+                if ($sejourData["date_de_naissance"]) $visitor->date_de_naissance = $sejourData["date_de_naissance"];
                 $visitor->save();
             } else {
                 $visitor = Visitor::create([
