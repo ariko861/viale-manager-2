@@ -20,6 +20,8 @@ class HouseResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-home-modern';
     protected static ?string $navigationGroup = 'Configuration';
     protected static ?string $modelLabel = "Maison";
+    protected static ?int $navigationSort = 8;
+
 
     public static function form(Form $form): Form
     {
