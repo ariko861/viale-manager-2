@@ -45,9 +45,9 @@ class Reservation extends Model
      */
     public function getColor(): string {
         mt_srand($this->id);
-        $red = random_int(128, 230);
-        $green = random_int(128, 230);
-        $blue = random_int(128, 230);
+        $red = mt_rand(128, 230);
+        $green = mt_rand(128, 230);
+        $blue = mt_rand(128, 230);
         return sprintf("#%02x%02x%02x", $red, $green, $blue);
     }
 

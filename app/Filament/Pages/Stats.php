@@ -78,10 +78,6 @@ class Stats extends Page implements HasForms, HasTable
                                 $data['from'] && $data['until'],
                                 fn(Builder $query, $date): Builder => $query->withinDates($data['from'], $data['until']),
                             );
-//                            ->when(
-//                                $data['until'],
-//                                fn(Builder $query, $date): Builder => $query->whereDate('arrival_date', '<=', $date),
-//                            );
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if (! $data['from'] || !$data['until']) {
