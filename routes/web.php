@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\SejourConfirmed;
+use App\Models\Option;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\VisitorForm;
 
@@ -16,7 +17,8 @@ use App\Livewire\VisitorForm;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $options = Option::all();
+    return view('welcome', ['options' => $options]);
 })->name('home');
 
 Route::get('/confirmation/{link_token}', VisitorForm::class)->name('confirmation');
