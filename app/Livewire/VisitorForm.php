@@ -242,6 +242,7 @@ class VisitorForm extends Component implements HasForms
                                 ->schema([
                                     TextInput::make('contact_email')
                                         ->label("Email de la personne de contact")
+                                        ->email()
                                         ->required()
                                     ,
                                     TextInput::make('contact_phone')

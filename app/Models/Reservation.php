@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Mail\ReservationConfirmed;
+use App\Mail\ReservationConfirmedToVisitor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +41,9 @@ class Reservation extends Model
         $this->authorize_edition = false;
         $this->save();
         Mail::to(Option::getVialeEmail())->queue(new ReservationConfirmed($this));
+        if ($this->contact_email){
+            Mail::to($this->contact_email)->queue(new ReservationConfirmedToVisitor($this));
+        }
     }
 
     public function generateLinkToken(): void {
@@ -48,6 +52,14 @@ class Reservation extends Model
 
     public function getLink(): string {
         return urldecode(route('confirmation', $this->link_token) );// . '?link_token=' . $this->link_token);
+    }
+
+    public function getLinkConfirmed(): ?string
+    {
+        if (!$this->isConfirmed()){
+            return null;
+        }
+        return urldecode(route('confirmed', $this->link_token) );
     }
 
     /**
