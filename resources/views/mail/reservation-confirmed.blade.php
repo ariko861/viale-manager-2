@@ -10,7 +10,7 @@
             Prix de la nuit : {{ $sejour->price }}
     @endforeach
 
-<x-mail::button :url="''">
+<x-mail::button :url="\App\Filament\Resources\ReservationResource::getUrl('view', ['record' => $reservation->id])">
 Accéder à la réservation
 </x-mail::button>
 

@@ -39,7 +39,7 @@ class Reservation extends Model
         $this->confirmed_at = now();
         $this->authorize_edition = false;
         $this->save();
-        Mail::to(Option::getVialeEmail())->send(new ReservationConfirmed($this));
+        Mail::to(Option::getVialeEmail())->queue(new ReservationConfirmed($this));
     }
 
     public function generateLinkToken(): void {
