@@ -55,17 +55,20 @@ class VisitorResource extends Resource
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('date_de_naissance')
+                    ->wrapHeader()
                     ->date()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('confirmed')
                     ->boolean()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('email')
+                    ->wrap()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('sejours_count')
                     ->label("Séjours passés")
+                    ->wrapHeader()
                     ->counts('sejours')
                     ->sortable()
                 ,
@@ -81,9 +84,7 @@ class VisitorResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable(),
+
             ])
             ->filters([
                 Tables\Filters\Filter::make('confirmed')
