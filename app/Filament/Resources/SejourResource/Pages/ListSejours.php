@@ -67,6 +67,7 @@ class ListSejours extends ListRecords
     }
 
 
+    # Une table est créée dans listes séjours pour manipuler les dispatch
     public function table(Tables\Table $table): Tables\Table
     {
         return $table
@@ -103,8 +104,8 @@ class ListSejours extends ListRecords
                                 ->date('D j F Y')
                                 ->sortable(),
                         ]),
-                        Tables\Columns\TextColumn::make('room.name'),
-                        Tables\Columns\TextColumn::make('profile.price')
+                        Tables\Columns\TextColumn::make('room.full_name'),
+                        Tables\Columns\TextColumn::make('price')
                             ->label("Prix choisi")
                             ->money('eur'),
 //                    Tables\Columns\TextColumn::make('created_at')
@@ -126,7 +127,7 @@ class ListSejours extends ListRecords
                         return $record->getRemarques();
                     }),
             ])
-//            ->defaultGroup('reservation.id')
+            ->defaultGroup('reservation.id')
             ->filters([
                 //
                 Tables\Filters\Filter::make('remove_past')

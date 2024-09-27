@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\SejourResource;
 use App\Models\Sejour;
+use Carbon\Carbon;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -18,6 +19,20 @@ class CalendarWidget extends FullCalendarWidget
 {
 
     public string|null|\Illuminate\Database\Eloquent\Model $model = Sejour::class;
+    protected static ?int $sort = 10;
+
+    public function config(): array
+    {
+        return [
+            'firstDay' => 1,
+            'headerToolbar' => [
+                'left' => 'dayGridWeek,dayGridDay,dayGridMonth',
+                'center' => 'title',
+                'right' => 'prev,next today',
+            ],
+            'initialView' => 'dayGridWeek'
+        ];
+    }
 
     public function fetchEvents(array $fetchInfo): array
     {
@@ -25,23 +40,14 @@ class CalendarWidget extends FullCalendarWidget
         // This method should return an array of event-like objects. See: https://github.com/saade/filament-fullcalendar/blob/3.x/#returning-events
         // You can also return an array of EventData objects. See: https://github.com/saade/filament-fullcalendar/blob/3.x/#the-eventdata-class
         return Sejour::query()
-            ->where(function (Builder $query) use ($fetchInfo) {
-                // On récupère les dates de fin et début de séjour entre dates de début et date de fin du calendrier
-                $query->orWhere(function (Builder $query) use ($fetchInfo) {
-                        $query->where('arrival_date', '>=', $fetchInfo['start'])
-                            ->where('arrival_date', '<=', $fetchInfo['end']);
-                })->orWhere(function (Builder $query) use ($fetchInfo) {
-                    $query->where('departure_date', '>=', $fetchInfo['start'])
-                        ->where('departure_date', '<=', $fetchInfo['end']);
-                });
-            })
+             ->withinDates($fetchInfo['start'], $fetchInfo['end'])
             ->get()
             ->map(
                 fn (Sejour $sejour) => [
                     'id' => $sejour->id,
                     'title' => $sejour->visitor?->full_name,
-                    'start' => $sejour->arrival_date,
-                    'end' => $sejour->departure_date,
+                    'start' => $sejour->arrival_date->format('Y-m-d'),
+                    'end' => $sejour->departure_date?->addDay()->format('Y-m-d') ?? Carbon::parse($fetchInfo['end'])->addYear(),
                     'url' => SejourResource::getUrl(name: 'view', parameters: ['record' => $sejour]),
                     'shouldOpenUrlInNewTab' => true,
                     'borderColor' => $sejour->confirmed ? 'green' : 'red',
@@ -86,15 +92,7 @@ class CalendarWidget extends FullCalendarWidget
     protected function headerActions(): array
     {
         return [
-            CreateAction::make()
-                ->mountUsing(
-                    function (Form $form, array $arguments) {
-                        $form->fill([
-                            'arrival_date' => $arguments['start'] ?? null,
-                            'departure_date' => $arguments['end'] ?? null
-                        ]);
-                    }
-                )
+
         ];
     }
 }

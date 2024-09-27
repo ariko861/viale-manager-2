@@ -11,8 +11,8 @@
 
                 @foreach ($tabs as $tabKey => $tab)
                     @php
-                        $activeTab = strval($activeTab);
-                        $tabKey = strval($tabKey);
+                        $activeTab = (string) $activeTab;
+                        $tabKey = (string) $tabKey;
                     @endphp
 
                     <x-filament::tabs.item

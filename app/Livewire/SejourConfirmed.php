@@ -64,13 +64,16 @@ class SejourConfirmed extends Component implements HasForms, HasInfolists
                                     ->icon('heroicon-m-phone')
                                     ->label("Numéro de téléphone"),
 //                                        ]),
-                                TextEntry::make('arrival_date')
-                                    ->label("Date d'arrivée")
-                                    ->date(),
-                                TextEntry::make('departure_date')
-                                    ->label("Date de départ"),
-                                TextEntry::make('profile.name'),
-                                TextEntry::make('profile.price')
+                                Fieldset::make('dates')
+                                    ->label("Dates")
+                                    ->schema([
+                                        TextEntry::make('arrival_date')
+                                            ->label("Arrivée")
+                                            ->date(),
+                                        TextEntry::make('departure_date')
+                                            ->label("Départ"),
+                                    ]),
+                                TextEntry::make('price')
                                     ->money('eur'),
                             ]),
 

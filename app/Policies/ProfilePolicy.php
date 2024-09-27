@@ -2,18 +2,20 @@
 
 namespace App\Policies;
 
-use App\Models\Profile;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
+use App\Models\Profile;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProfilePolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->can('view_any_profile');
     }
 
     /**
@@ -21,7 +23,7 @@ class ProfilePolicy
      */
     public function view(User $user, Profile $profile): bool
     {
-        return true;
+        return $user->can('view_profile');
     }
 
     /**
@@ -29,7 +31,7 @@ class ProfilePolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        return $user->can('create_profile');
     }
 
     /**
@@ -37,7 +39,7 @@ class ProfilePolicy
      */
     public function update(User $user, Profile $profile): bool
     {
-        return $profile->sejours()->count() == 0;
+        return $user->can('update_profile');
     }
 
     /**
@@ -45,22 +47,62 @@ class ProfilePolicy
      */
     public function delete(User $user, Profile $profile): bool
     {
-        return $profile->sejours()->count() == 0;
+        return $user->can('delete_profile');
     }
 
     /**
-     * Determine whether the user can restore the model.
+     * Determine whether the user can bulk delete.
      */
-    public function restore(User $user, Profile $profile): bool
+    public function deleteAny(User $user): bool
     {
-        //
+        return $user->can('delete_any_profile');
     }
 
     /**
-     * Determine whether the user can permanently delete the model.
+     * Determine whether the user can permanently delete.
      */
     public function forceDelete(User $user, Profile $profile): bool
     {
-        //
+        return $user->can('{{ ForceDelete }}');
+    }
+
+    /**
+     * Determine whether the user can permanently bulk delete.
+     */
+    public function forceDeleteAny(User $user): bool
+    {
+        return $user->can('{{ ForceDeleteAny }}');
+    }
+
+    /**
+     * Determine whether the user can restore.
+     */
+    public function restore(User $user, Profile $profile): bool
+    {
+        return $user->can('{{ Restore }}');
+    }
+
+    /**
+     * Determine whether the user can bulk restore.
+     */
+    public function restoreAny(User $user): bool
+    {
+        return $user->can('{{ RestoreAny }}');
+    }
+
+    /**
+     * Determine whether the user can replicate.
+     */
+    public function replicate(User $user, Profile $profile): bool
+    {
+        return $user->can('{{ Replicate }}');
+    }
+
+    /**
+     * Determine whether the user can reorder.
+     */
+    public function reorder(User $user): bool
+    {
+        return $user->can('{{ Reorder }}');
     }
 }

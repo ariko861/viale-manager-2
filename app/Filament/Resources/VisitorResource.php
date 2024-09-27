@@ -71,7 +71,10 @@ class VisitorResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\Filter::make('confirmed')
+                    ->label("Visiteurs confirmés uniquement")
+                    ->default()
+                    ->query(fn(Builder $query) => $query->where('confirmed', true))
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

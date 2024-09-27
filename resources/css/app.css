@@ -1,3 +1,131 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+
+    a {
+        @apply text-blue-600 hover:text-blue-200;
+    }
+    h1 {
+        @apply text-3xl font-extrabold;
+    }
+    h2 {
+        @apply text-2xl font-bold;
+    }
+    h3 {
+        @apply text-xl font-semibold;
+    }
+    h4 {
+        @apply text-lg font-semibold;
+    }
+    h5,
+    h6 {
+    }
+    .btn, button {
+        /* ... */
+        background-color: theme('colors.white');
+        @apply p-2;
+        @apply border-2;
+        @apply rounded-xl;
+        @apply bg-gray-200 hover:bg-gray-500;
+    }
+    .btn-warning {
+        @apply bg-red-500 hover:bg-red-800;
+    }
+    .btn-sm {
+        @apply p-2 border-2 text-xs;
+
+    }
+    .btn-submit {
+        @apply bg-blue-500 hover:bg-blue-800;
+    }
+    .error-message {
+        @apply text-red-600;
+    }
+    .option-field {
+        @apply p-6 bg-gray-100 text-sm;
+    }
+    .alert {
+        @apply p-4 text-center;
+    }
+    .alert-error {
+        @apply bg-red-200;
+    }
+    .hidden-remarks {
+        display: none;
+    }
+    .border-spacing {
+        border-spacing: 0 15px;
+    }
+    .hover-discover:hover .discover-child {
+        display: block;
+
+    }
+    .hover-discover:hover .cover-child {
+        display: none;
+    }
+    .discover-child {
+        display: none;
+        transition: all 500ms ease;
+    }
+    .inline-child > div {
+        display: inline;
+    }
+    .card {
+        background-color: theme('colors.white');
+        border-radius: theme('borderRadius.lg');
+        padding: theme('spacing.6');
+        box-shadow: theme('boxShadow.xl');
+    }
+    .error {
+        @apply text-red-500;
+    }
+
+    /*@keyframes blinker {
+        50% {
+            opacity: 0;
+        }
+    }*/
+
+    @keyframes blinker {
+        50% {
+            @apply bg-blue-400;
+        }
+    }
+    @keyframes otherblinker {
+        50% {
+            @apply bg-red-100;
+        }
+    }
+
+
+    .moving {
+        animation: blinker 2s linear infinite;
+    }
+    .movable-receiver {
+        animation: otherblinker 6s linear infinite;
+        cursor: pointer;
+        @apply hover:bg-lime-600;
+    }
+
+    .draggable {
+        touch-action: none;
+        user-select: none;
+    }
+    .ui-state-hover {
+        @apply bg-blue-400;
+    }
+    .badge {
+        display: inline-block;
+        padding: .35em .65em;
+        font-size: .75em;
+        font-weight: 700;
+        line-height: 1;
+        color: #fff;
+        @apply bg-blue-500 rounded-xl;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+    }
+}

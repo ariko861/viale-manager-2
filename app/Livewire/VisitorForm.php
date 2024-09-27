@@ -84,7 +84,7 @@ class VisitorForm extends Component implements HasForms
     {
         $messages = Message::where('type', MessageTypes::Link)->get();
         $messagesDisplay = $messages->map(function(Message $item, $index){
-            return Placeholder::make($item->title)->content($item->message);
+            return Placeholder::make($item->title)->content(fn() => new HtmlString($item->message));
         });
         return $form
             ->schema([
@@ -111,7 +111,8 @@ class VisitorForm extends Component implements HasForms
                                     DatePicker::make('departure_date')
                                         ->label("Date de départ")
                                         ->required()
-                                        ->minDate($this->arrival_date)
+                                        ->live()
+                                        ->minDate(fn() => $this->arrival_date)
                                         ->afterStateUpdated(fn ($state) => $this->departure_date = $state),
                                 ])
                                 ->columns(2),
@@ -206,18 +207,21 @@ class VisitorForm extends Component implements HasForms
                                                 ->schema([
                                                     DatePicker::make('arrival_date')
                                                         ->required()
+                                                        ->live()
+                                                        ->minDate(today())
                                                         ->default($this->arrival_date),
                                                     DatePicker::make('departure_date')
                                                         ->required()
+                                                        ->minDate(fn(Get $get) => $get('arrival_date'))
                                                         ->default($this->departure_date),
                                                 ]),
-                                            Select::make('profile_id')
+                                            Select::make('price')
                                                 ->label("Profil de prix")
                                                 ->prefixIcon('heroicon-o-currency-euro')
                                                 ->required()
 //                                                ->relationship('profile', 'name')
                                                 ->options(fn() => Profile::all()->mapWithKeys(function($profile) {
-                                                    return [$profile->id => $profile->name. " ".$profile->euro];
+                                                    return [$profile->price => $profile->name. " ".$profile->euro];
                                                 })),
                                         ])
                                 ]),
@@ -255,7 +259,7 @@ BLADE)))
             if ($sejourData["visitor_id"]){
                 $visitor = Visitor::find($sejourData["visitor_id"]);
                 if ($sejourData["phone"]) $visitor->phone = $sejourData["phone"];
-                if ($sejourData["date_de_naissance"]) $visitor->phone = $sejourData["date_de_naissance"];
+                if ($sejourData["date_de_naissance"]) $visitor->date_de_naissance = $sejourData["date_de_naissance"];
                 $visitor->save();
             } else {
                 $visitor = Visitor::create([
@@ -266,15 +270,15 @@ BLADE)))
                     'email' => $sejourData["email"]
                 ]);
             }
-            $profile = Profile::find($sejourData["profile_id"]);
-            if (!$profile) $profile = Profile::where('is_default', true)->first();
+            $price = $sejourData["price"];
+//            if (!$price) $price = Profile::where('is_default', true)->first()->price;
 
             // Pour ensuite l'assigner au séjour nouvellement créé:
             if ($sejourData["sejour_id"]){
                 $sejour = Sejour::find($sejourData["sejour_id"])->update([
                     'arrival_date' => $sejourData["arrival_date"],
                     'departure_date' => $sejourData["departure_date"],
-                    'profile_id' => $profile->id,
+                    'price' => $price,
 //                    'visitor_id' => $visitor->id,
 //                    'reservation_id' => $this->reservation->id,
                     'confirmed' => true,
@@ -284,7 +288,7 @@ BLADE)))
                 $sejour = Sejour::create([
                     'arrival_date' => $sejourData["arrival_date"],
                     'departure_date' => $sejourData["departure_date"],
-                    'profile_id' => $profile->id,
+                    'price' => $price,
                     'visitor_id' => $visitor->id,
                     'reservation_id' => $this->reservation->id,
                     'confirmed' => true,
@@ -296,21 +300,6 @@ BLADE)))
         $this->redirectRoute('confirmed', $this->reservation->link_token);
     }
 
-//    public function selectVisitor()
-//    {
-//        $visitor = Visitor::find($this->selected_visitor_id);
-//        $this->form->fill(['sejours' => [
-//                0 => [
-//                    'nom' => $visitor->nom,
-//                    'prenom' => $visitor->prenom,
-//                    'email' => $visitor->email,
-//                    'date_de_naissance' => $visitor->date_de_naissance,
-//                    'phone' => $visitor->phone,
-//                ]
-//            ]
-//        ]);
-//        $this->dispatch('close-modal', id: 'select-existing-visitor');
-//    }
 
     public function render()
     {

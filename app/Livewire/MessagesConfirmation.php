@@ -9,6 +9,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Illuminate\Support\HtmlString;
 use Livewire\Component;
 
 class MessagesConfirmation extends Component implements HasForms
@@ -19,7 +20,7 @@ class MessagesConfirmation extends Component implements HasForms
     {
         $messages = Message::where('type', MessageTypes::Confirmation)->get();
         $messagesDisplay = $messages->map(function(Message $item, $index){
-            return Placeholder::make($item->title)->content($item->message);
+            return Placeholder::make($item->title)->content(new HtmlString($item->message));
         });
         return $form->schema([
             Section::make('Bienvenue')

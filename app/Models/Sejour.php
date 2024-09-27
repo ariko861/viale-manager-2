@@ -14,7 +14,12 @@ class Sejour extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["reservation_id", "visitor_id", "profile_id", "confirmed", "remove_from_stats", "arrival_date", "departure_date", "remarques_visiteur", "remarques_accueil"];
+    protected $fillable = ["reservation_id", "visitor_id", "price", "confirmed", "remove_from_stats", "arrival_date", "departure_date", "remarques_visiteur", "remarques_accueil"];
+
+    protected $casts = [
+        'arrival_date' => 'date:Y-m-d',
+        'departure_date' => 'date:Y-m-d',
+    ];
 
     public function reservation(): BelongsTo
     {
@@ -31,11 +36,6 @@ class Sejour extends Model
         return $this->belongsTo(Room::class);
     }
 
-    public function profile(): BelongsTo
-    {
-        return $this->belongsTo(Profile::class);
-    }
-
     public function accompagnants(): HasMany
     {
         return $this->hasMany(self::class, 'reservation_id', 'reservation_id');
@@ -50,7 +50,7 @@ class Sejour extends Model
 
     public function getTotalPriceAttribute(): float
     {
-        return $this->nuits * ($this->profile?->price ?? 0 );
+        return $this->nuits * ($this->price ?? 0 );
     }
     public function getRemarques(): ?string
     {
@@ -72,7 +72,7 @@ class Sejour extends Model
      * @param Carbon $endDate
      * @return void
      */
-    public function scopeWithinDates(Builder $query, Carbon $startDate, Carbon $endDate): void {
+    public function scopeWithinDates(Builder $query, Carbon|string $startDate, Carbon|string $endDate): void {
         $query->whereDate('arrival_date', '<=', $endDate)
             ->where(function (Builder $q) use ($startDate){
                 $q->whereDate('departure_date', '>=', $startDate)
