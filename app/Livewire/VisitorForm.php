@@ -237,7 +237,7 @@ class VisitorForm extends Component implements HasForms
         type="submit"
         size="sm"
     >
-        Submit
+        Confirmer
     </x-filament::button>
 BLADE)))
                     ]),
@@ -250,9 +250,7 @@ BLADE)))
     {
         $data = $this->form->getState();
 //        dd($data);
-        $this->reservation->confirmed_at = now();
-//        $this->reservation->authorize_edition = false;
-        $this->reservation->remarques_visiteur = $data["remarques_visiteur"];
+
 //        $this->reservation->sejours()->delete();
         foreach ($data["sejours"] as $sejourData){
             // On commence par créer ou récupérer le visiteur
@@ -296,6 +294,9 @@ BLADE)))
             }
 
         }
+        $this->reservation->confirmed_at = now();
+        $this->reservation->authorize_edition = false;
+        $this->reservation->remarques_visiteur = $data["remarques_visiteur"];
         $this->reservation->save();
         $this->redirectRoute('confirmed', $this->reservation->link_token);
     }

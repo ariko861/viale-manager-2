@@ -22,6 +22,7 @@ class Stats extends Page implements HasForms, HasTable
     use InteractsWithForms;
     use InteractsWithTable;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $title = "Statistiques";
 
     protected static string $view = 'filament.pages.stats';
 

@@ -45,7 +45,7 @@ class Sejour extends Model
     {
         $arrival_date = Carbon::parse($this->arrival_date);
         $departure_date = Carbon::parse($this->departure_date);
-        return $departure_date->diffInDays($arrival_date);
+        return $departure_date->diffInDays($arrival_date, absolute: true);
     }
 
     public function getTotalPriceAttribute(): float

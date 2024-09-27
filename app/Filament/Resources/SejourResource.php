@@ -93,6 +93,7 @@ class SejourResource extends Resource
                         ,
                     ]),
                 Forms\Components\Section::make('reservation')
+                    ->label("Réservation")
                     ->relationship('reservation')
                     ->schema([
                         Forms\Components\Textarea::make('remarques_visiteur')
@@ -103,6 +104,10 @@ class SejourResource extends Resource
                             ->content(function(Reservation $record): HtmlString {
                                 return new HtmlString("<span class='text-primary-400 cursor-pointer'>{$record->getLink()}</span>");
                             })
+                        ,
+                        Toggle::make('authorize_edition')
+                            ->label("Autorisé à modifier sa réservation")
+                        ,
                     ])
             ]);
     }
