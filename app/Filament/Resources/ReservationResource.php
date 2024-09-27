@@ -27,6 +27,25 @@ class ReservationResource extends Resource
         return $form
             ->schema([
 
+                Forms\Components\Toggle::make('link_sent')
+                    ->label("Lien du formulaire envoyé")
+                ,
+                Forms\Components\Toggle::make('authorize_edition')
+                    ->label("Peut modifier sa réservation")
+                ,
+                Forms\Components\TextInput::make('contact_email')
+                    ->email()
+                    ->label("Email de contact")
+                ,
+                Forms\Components\TextInput::make('contact_phone')
+                    ->label("Téléphone de contact")
+                ,
+                Forms\Components\RichEditor::make('remarques_accueil'),
+
+                Forms\Components\RichEditor::make('remarques_visiteur')
+                    ->disabled()
+                    ->columnSpanFull()
+                ,
             ]);
     }
 

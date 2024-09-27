@@ -23,7 +23,7 @@ class Room extends Model
     {
         if ($this->house && $this->house->displayHouseNameWithRoom)
         {
-            return ($this->house->name)."->".($this->name);
+            return ($this->house->name)." : ".($this->name);
         } else {
             return $this->name;
         }
