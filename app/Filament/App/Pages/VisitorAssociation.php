@@ -40,9 +40,12 @@ class VisitorAssociation extends Page
             ])
             ->action(function(array $data): void
             {
-                $this->user->visitor_id = $data['visitor_id'];
-                $this->user->save();
-                $this->redirect(Dashboard::getUrl(panel: 'app'));
+                $visitor = Visitor::query()->findOrFail($data['visitor_id']);
+                if ($visitor?->email === $this->user->email){
+                    $this->user->visitor_id = $data['visitor_id'];
+                    $this->user->save();
+                    $this->redirect(Dashboard::getUrl(panel: 'app'));
+                }
             });
     }
 
