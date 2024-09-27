@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Custom\SejourFilters;
 use App\Filament\Resources\SejourResource\Pages;
 use App\Filament\Resources\SejourResource\RelationManagers;
 use App\Livewire\RoomsOccupation;
@@ -9,15 +10,25 @@ use App\Models\Reservation;
 use App\Models\Sejour;
 use App\Models\Visitor;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
+use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class SejourResource extends Resource
 {
@@ -96,45 +107,62 @@ class SejourResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
+
+        # Non utilisée ! on utilise la table dans ListSejours
+    public static function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->columns([
-                Tables\Columns\ColorColumn::make('reservation')
-                    ->state(fn(Sejour $record) => $record->reservation->getColor())
-                ,
-                Tables\Columns\TextColumn::make('visitor.nom')
-                    ->label("Nom")
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('visitor.prenom')
-                    ->label("Prénom")
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('confirmed')
-                    ->boolean(),
-                Tables\Columns\ToggleColumn::make('remove_from_stats'),
-                Tables\Columns\TextColumn::make('arrival_date')
-                    ->label("Date d'arrivée")
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('departure_date')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('room.full_name'),
-                Tables\Columns\TextColumn::make('profile.price')
-                    ->label("Prix choisi")
-                    ->money('eur'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                Split::make([
+
+                    Tables\Columns\ColorColumn::make('reservation')
+                        ->state(fn(Sejour $record) => $record->reservation->getColor())
+                    ,
+                    Tables\Columns\Layout\Stack::make([
+
+                        Tables\Columns\TextColumn::make('visitor.nom')
+                            ->label("Nom")
+                            ->formatStateUsing(fn (string $state): string => Str::upper($state))
+                            ->searchable()
+                            ->sortable(),
+                        Tables\Columns\TextColumn::make('visitor.prenom')
+                            ->label("Prénom")
+                            ->searchable()
+                            ->sortable(),
+                    ]),
+                    Tables\Columns\IconColumn::make('confirmed')
+                        ->boolean()
+                        ->tooltip("Confirmé ?")
+                    ,
+//                Tables\Columns\ToggleColumn::make('remove_from_stats'),
+                    Tables\Columns\Layout\Stack::make([
+                        Tables\Columns\TextColumn::make('arrival_date')
+                            ->label("Date d'arrivée")
+                            ->date('D j F Y')
+                            ->sortable(),
+                        Tables\Columns\TextColumn::make('departure_date')
+                            ->label("Date de départ")
+                            ->date('D j F Y')
+                            ->sortable(),
+                    ]),
+                    Tables\Columns\TextColumn::make('room.name'),
+                    Tables\Columns\TextColumn::make('price')
+                        ->label("Prix choisi")
+                        ->money('eur'),
+//                    Tables\Columns\TextColumn::make('created_at')
+//                        ->dateTime()
+//                        ->sortable()
+//                        ->toggleable(isToggledHiddenByDefault: true),
+//                    Tables\Columns\TextColumn::make('updated_at')
+//                        ->dateTime()
+//                        ->sortable()
+//                        ->toggleable(isToggledHiddenByDefault: true),
+                ]),
+
             ])
             ->defaultSort('arrival_date')
             ->groups([
-                Group::make('reservation.id')
+                Tables\Grouping\Group::make('reservation.id')
                     ->label("Réservation")
                     ->getDescriptionFromRecordUsing(function(Sejour $record): ?string {
                         return $record->getRemarques();
@@ -147,11 +175,100 @@ class SejourResource extends Resource
                     ->label("Ne pas afficher les séjours passés")
                     ->toggle()
                     ->query(fn (Builder $query): Builder => $query->scopes('withoutPast'))
-                    ->default()
+                    ->default(),
+                Tables\Filters\Filter::make('confirmed')
+                    ->label("Confirmés uniquement")
+                    ->query(fn (Builder $query): Builder => $query->confirmed())
+                    ->toggle()
+                ,
+                SejourFilters::dateFilter('arrival_date'),
+                SejourFilters::dateFilter('departure_date'),
+                SejourFilters::presenceFilter('presence_filter'),
 
+
+            ], layout: FiltersLayout::Modal)
+            ->filtersFormWidth(MaxWidth::FourExtraLarge)
+            ->filtersFormSchema(fn (array $filters): array => [
+                $filters['remove_past'],
+                $filters['confirmed'],
+                Fieldset::make("Date d'arrivée entre")
+                    ->schema([
+                        $filters['arrival_date'],
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull()
+                ,
+                Fieldset::make("Date de départ entre")
+                    ->schema([
+                        $filters['departure_date'],
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull()
+                ,
+                Fieldset::make("Présents entre")
+                    ->schema([
+                        $filters['presence_filter'],
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull()
+                ,
             ])
             ->actions([
-                Tables\Actions\Action::make('select_room'),
+                Tables\Actions\Action::make('select_room')
+//                    ->visible(fn(Sejour $record) => !$record->room()->exists() )
+                    ->color('info')
+                    ->iconButton()
+                    ->icon('heroicon-o-home')
+                    ->action(function (Sejour $record) {
+                        $startDate = $record->arrival_date;
+                        $endDate = $record->departure_date;
+                        $this->dispatch('select-room', [$startDate, $endDate, $record->id]);
+                    }),
+                Tables\Actions\Action::make('edit_dates')
+//                    ->visible(fn(Sejour $record) => !$record->room()->exists() )
+                    ->color('warning')
+                    ->iconButton()
+                    ->icon('heroicon-o-calendar-days')
+                    ->fillForm(fn(Sejour $record): array => [
+                        'arrival_date' => $record->arrival_date,
+                        'departure_date' => $record->departure_date,
+                        'no_departure_date' => !$record->departure_date,
+                    ])
+                    ->form([
+                        DatePicker::make('arrival_date')
+                            ->label("Date d'arrivée")
+                            ->required()
+                        ,
+                        DatePicker::make('departure_date')
+                            ->label("Date de départ")
+                            ->required(fn(Get $get) => !$get('no_departure_date'))
+                            ->live()
+                            ->afterStateUpdated(function($state, Set $set){
+                                if ($state){
+                                    $set('no_departure_date', false);
+                                }
+                            })
+                        ,
+                        Toggle::make('no_departure_date')
+                            ->live()
+                            ->label("Ne connait pas sa date de départ")
+                            ->afterStateUpdated(function($state, Set $set){
+                                if ($state){
+                                    $set('departure_date', null);
+                                }
+                            })
+                    ])
+                    ->action(function (Sejour $record, array $data) {
+                        $record->arrival_date = $data['arrival_date'];
+                        $record->departure_date = $data['departure_date'];
+                        $record->save();
+                        Notification::make('sejour_updated')
+                            ->title("Les dates du séjour ont été mises à jour")
+                            ->icon('heroicon-o-calendar')
+                            ->success()
+                            ->send();
+                    }),
+
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
