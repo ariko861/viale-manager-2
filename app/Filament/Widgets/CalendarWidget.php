@@ -19,6 +19,7 @@ class CalendarWidget extends FullCalendarWidget
 {
 
     public string|null|\Illuminate\Database\Eloquent\Model $model = Sejour::class;
+    protected static ?int $sort = 10;
 
     public function config(): array
     {
