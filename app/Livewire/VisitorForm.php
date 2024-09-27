@@ -294,10 +294,8 @@ BLADE)))
             }
 
         }
-        $this->reservation->confirmed_at = now();
-        $this->reservation->authorize_edition = false;
         $this->reservation->remarques_visiteur = $data["remarques_visiteur"];
-        $this->reservation->save();
+        $this->reservation->confirm();
         $this->redirectRoute('confirmed', $this->reservation->link_token);
     }
 

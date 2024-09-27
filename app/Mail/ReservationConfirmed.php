@@ -41,7 +41,7 @@ class ReservationConfirmed extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.reservation-confirmed',
+            markdown: 'mail.reservation-confirmed',
             with: ['reservation' => $this->reservation]
         );
     }

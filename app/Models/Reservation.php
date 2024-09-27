@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Mail\ReservationConfirmed;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Random\RandomException;
 
@@ -30,6 +32,14 @@ class Reservation extends Model
         return Attribute::make(
             get: fn (): bool => !( $this->confirmed_at == null ),
         );
+    }
+
+    public function confirm(): void
+    {
+        $this->confirmed_at = now();
+        $this->authorize_edition = false;
+        $this->save();
+        Mail::to(Option::getVialeEmail())->send(new ReservationConfirmed($this));
     }
 
     public function generateLinkToken(): void {

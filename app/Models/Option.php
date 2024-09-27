@@ -25,6 +25,6 @@ class Option extends Model
 
     public static function getVialeEmail(): string
     {
-        return self::query()->firstWhere('name', 'email')->email;
+        return self::query()->firstWhere('name', 'email')->value;
     }
 }
