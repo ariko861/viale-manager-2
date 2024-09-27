@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Random\RandomException;
 
 class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["confirmed_at", "remarques_accueil", "remarques_visiteur"];
+    protected $fillable = ["confirmed_at", "remarques_accueil", "remarques_visiteur", "link_sent"];
     protected $attributes = [
         'max_days_change' => 255,
         'max_visitors' => 5
@@ -39,20 +40,24 @@ class Reservation extends Model
         return urldecode(route('confirmation', $this->link_token) );// . '?link_token=' . $this->link_token);
     }
 
+    /**
+     * @throws RandomException
+     */
     public function getColor(): string {
         mt_srand($this->id);
-        $red = mt_rand(128, 230);
-        $green = mt_rand(128, 230);
-        $blue = mt_rand(128, 230);
+        $red = random_int(128, 230);
+        $green = random_int(128, 230);
+        $blue = random_int(128, 230);
         return sprintf("#%02x%02x%02x", $red, $green, $blue);
     }
 
-    public static function createQuickReservation(int $max_days_change = 5, int $max_visitors = 5): self
+    public static function createQuickReservation(int $max_days_change = 5, int $max_visitors = 5, ?string $remarques_accueil = null): self
     {
         $newReservation = new self();
         $newReservation->generateLinkToken();
         $newReservation->max_days_change = $max_days_change;
         $newReservation->max_visitors = $max_visitors;
+        $newReservation->remarques_accueil = $remarques_accueil;
         $newReservation->save();
         return $newReservation;
     }
