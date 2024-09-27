@@ -22,4 +22,9 @@ class Option extends Model
 //        Option::where('name', 'confirmation_message')->orderBy('id')->get();
 //        Option::where('name', 'reservation_link_message')->orderBy('id')->get();
     }
+
+    public static function getVialeEmail(): string
+    {
+        return self::query()->firstWhere('name', 'email')->email;
+    }
 }
