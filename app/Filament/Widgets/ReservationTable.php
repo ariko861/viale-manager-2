@@ -38,6 +38,10 @@ class ReservationTable extends BaseWidget
                 Tables\Columns\ToggleColumn::make('link_sent')
                     ->label("Lien envoyé")
                 ,
+                Tables\Columns\IconColumn::make('is_confirmed')
+                    ->label("Réservation confirmée")
+                    ->boolean()
+                ,
 
             ])
             ->defaultPaginationPageOption(5)

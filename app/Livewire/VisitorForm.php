@@ -10,6 +10,7 @@ use App\Models\Sejour;
 use App\Models\Visitor;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Hidden;
@@ -27,8 +28,8 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Support\Enums\ActionSize;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\HtmlString;
 use Livewire\Component;
 
@@ -145,11 +146,12 @@ class VisitorForm extends Component implements HasForms
                                                         ->columnSpanFull()
                                                         ->prefixIcon('heroicon-o-envelope')
                                                         ->hint("Commencez par saisir une adresse email")
+                                                        ->helperText("Optionnel, permet de retrouver vos informations")
                                                         ->disabled(fn(Get $get) => $get('visitor_id') )
-                                                        ->live(onBlur: true)
+                                                        ->live(debounce: 750)
                                                         ->afterStateUpdated(function(string $state){
                                                             $this->existing_visitors = Visitor::where('email', $state)->get();
-//                                                            $this->dispatch('open-modal', id: 'select-existing-visitor');
+
                                                         })
                                                         ->email(),
                                                     Select::make('select_visitor')
@@ -192,7 +194,9 @@ class VisitorForm extends Component implements HasForms
                                                     ,
                                                     TextInput::make('phone')
                                                         ->prefixIcon('heroicon-o-phone')
+                                                        ->helperText('Optionnel')
                                                     ,
+
                                                     Hidden::make('visitor_id'),
                                                     Hidden::make('sejour_id'),
                                                 ]),
@@ -224,11 +228,26 @@ class VisitorForm extends Component implements HasForms
                                                     return [$profile->price => $profile->name. " ".$profile->euro];
                                                 })),
                                         ])
-                                ]),
+                                ])
+                                ->afterValidation(function (Get $get, Set $set){
+                                    $first_visitor = array_values($get('sejours'))[0];
+                                    $set('contact_email', $first_visitor['email']);
+                                    $set('contact_phone', $first_visitor['phone']);
+                                })
+                            ,
+
                             Step::make('Remarques')
                                 ->icon("heroicon-o-chat-bubble-bottom-center-text")
                                 ->description("Souhaite-vous ajouter une remarque à cette réservation ?")
                                 ->schema([
+                                    TextInput::make('contact_email')
+                                        ->label("Email de la personne de contact")
+                                        ->required()
+                                    ,
+                                    TextInput::make('contact_phone')
+                                        ->label("Téléphone de la personne de contact")
+                                        ->required()
+                                    ,
                                     Textarea::make('remarques_visiteur')
                                         ->label("Remarques"),
                                 ])
@@ -294,7 +313,11 @@ BLADE)))
             }
 
         }
-        $this->reservation->remarques_visiteur = $data["remarques_visiteur"];
+        $this->reservation->update([
+            'remarques_visiteur' => $data['remarques_visiteur'],
+            'contact_email' => $data['contact_email'],
+            'contact_phone' => $data['contact_phone'],
+        ]);
         $this->reservation->confirm();
         $this->redirectRoute('confirmed', $this->reservation->link_token);
     }
