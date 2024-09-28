@@ -29,7 +29,7 @@ class AssignationMaisonnee extends Model
 
     public function getTitleAttribute(): string
     {
-        return $this->sejour?->visitor?->full_name;
+        return "{$this->sejour?->visitor?->full_name}";
     }
 
 }

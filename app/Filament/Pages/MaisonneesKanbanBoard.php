@@ -5,11 +5,18 @@ namespace App\Filament\Pages;
 use App\Models\AssignationMaisonnee;
 use App\Models\House;
 use App\Models\MaisonneesPlanning;
+use App\Models\Visitor;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Field;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\TextEntry;
 use Illuminate\Contracts\Support\Htmlable;
 use Livewire\Attributes\Reactive;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
@@ -17,10 +24,13 @@ use Illuminate\Support\Collection;
 
 class MaisonneesKanbanBoard extends KanbanBoard
 {
+
+    use HasPageShield;
     protected static string $model = AssignationMaisonnee::class;
     protected static string $recordStatusAttribute = 'house_id';
 
     protected static ?string $navigationLabel = 'Maisonnées';
+//    public bool $disableEditModal = true;
 
     protected static ?string $navigationGroup = 'Accueil';
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
@@ -155,6 +165,53 @@ class MaisonneesKanbanBoard extends KanbanBoard
                 })
             ,
         ];
+    }
+
+    protected function getEditModalFormSchema(null|int $recordId): array
+    {
+        $assignation = AssignationMaisonnee::query()->find($recordId);
+        return [
+            Fieldset::make('Séjour')
+                ->relationship('sejour')
+                ->schema([
+                    Fieldset::make('Visiteur')
+                        ->relationship('visitor')
+                        ->schema([
+                            TextInput::make('nom')
+                                ->disabled()
+                            ,
+                            TextInput::make('prenom')
+                                ->disabled()
+                            ,
+                            DatePicker::make('date_de_naissance')
+                                ->disabled()
+                            ,
+                            Placeholder::make('age')
+                                ->content(fn() => $assignation?->sejour?->visitor?->age)
+                            ,
+                        ])
+                    ,
+                    Fieldset::make('Dates')
+                        ->schema([
+                            DatePicker::make('arrival_date')
+                                ->label("Arrivée")
+                                ->disabled()
+                            ,
+                            DatePicker::make('departure_date')
+                                ->label("Départ")
+                                ->disabled()
+                            ,
+
+                        ]),
+                ])
+            ,
+
+        ];
+    }
+
+    protected function editRecord($recordId, array $data, array $state): void
+    {
+
     }
 
 }
