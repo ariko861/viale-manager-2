@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 
 class House extends Model
@@ -19,9 +21,18 @@ class House extends Model
 
     protected $fillable = ['name', 'community', 'displayHouseNameWithRoom'];
 
+    protected $attributes = ['title'];
+
     public function getRoomCountAttribute()
     {
         $this->rooms->count();
+    }
+
+    public function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->name,
+        );
     }
 
     public function rooms()
@@ -33,4 +44,17 @@ class House extends Model
     {
         return $this->hasMany(VisitorReservation::class);
     }
+
+    public static function prepareForKanban(): Collection
+    {
+        $houses = self::query()->select('name', 'id')->where('community', true)->without('rooms')->get()->toArray();
+        $houses = array_map(function($item){
+            $item = array_combine(['id', 'title'], [$item['id'], $item['name']]);
+            return $item;
+        }, $houses);
+        array_unshift($houses, ['id' => 0, 'title' => "à placer"]);
+
+        return collect($houses);
+    }
+
 }
