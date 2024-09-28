@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('maisonnees_planning', function (Blueprint $table) {
             $table->id();
-            $table->date('debut');
-            $table->date('fin');
+            $table->date('begin');
+            $table->date('end');
+            $table->timestamps();
 
         });
     }
