@@ -26,6 +26,10 @@ class MaisonneesKanbanBoard extends KanbanBoard
     {
         if (MaisonneesPlanning::query()->current()->count() === 0) {
             $this->defaultAction = 'onboarding';
+            $planning = new MaisonneesPlanning();
+            $planning->begin = today();
+            $planning->end = today();
+            $this->planning = $planning;
         } else {
             $this->planning = MaisonneesPlanning::query()->current()->first();
             $this->planning->preparePlanning();
@@ -45,10 +49,11 @@ class MaisonneesKanbanBoard extends KanbanBoard
                     ->default($end_week)
                 ,
             ])->action(function(array $data){
-                MaisonneesPlanning::create([
+                $this->planning = MaisonneesPlanning::create([
                     'begin' => $data['begin'],
                     'end' => $data['end'],
                 ]);
+                $this->planning->preparePlanning();
             });
 
     }
@@ -67,12 +72,16 @@ class MaisonneesKanbanBoard extends KanbanBoard
 
     protected function records(): Collection
     {
-        return $this->planning->assignations;
+        return $this->planning?->assignations;
     }
 
     public function getHeading(): string|Htmlable
     {
-        return 'Maisonnées '. $this->planning?->display_name;
+        if ($this->planning?->id){
+            return 'Maisonnées '. $this->planning?->display_name;
+        }
+
+        return 'Maisonnées';
     }
 
     protected function getHeaderActions(): array

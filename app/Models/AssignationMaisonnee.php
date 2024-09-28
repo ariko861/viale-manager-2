@@ -11,7 +11,7 @@ class AssignationMaisonnee extends Model
 {
     use HasFactory;
 
-    protected $table = "sejours_in_maisonnees";
+    protected $table = "assignations_maisonnees";
 
     protected $fillable = ['sejour_id', 'house_id', 'planning_id'];
 
