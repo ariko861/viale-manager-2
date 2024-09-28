@@ -59,6 +59,14 @@ class SejourResource extends Resource
                             ->required()
                             ->disabledOn('edit')
                         ,
+                        Forms\Components\TextInput::make('email')
+                            ->required()
+                            ->disabledOn('edit')
+                        ,
+                        Forms\Components\TextInput::make('phone')
+                            ->required()
+                            ->disabledOn('edit')
+                        ,
                     ]),
                 Forms\Components\Section::make('Détails')
                     ->aside()
