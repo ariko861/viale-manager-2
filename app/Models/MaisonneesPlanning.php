@@ -64,17 +64,28 @@ class MaisonneesPlanning extends Model
         } else {
             $action = Action::class;
         }
-        $begin_week = Carbon::today()->startOfWeek();
-        $end_week = Carbon::today()->endOfWeek();
+        $plannings = self::query();
+        if ($plannings->count() === 0){
+            $begin_week = Carbon::today()->startOfWeek();
+            $end_week = Carbon::today()->endOfWeek();
+        } else {
+            $planning = $plannings->latest('end')->first();
+            $begin_week = $planning->end->copy()->addDay();
+            $end_week = $begin_week->copy()->addDays(6);
+
+        }
+
         return $action::make('create_planning')
             ->label("Créer un nouveau planning de maisonnées")
             ->color('success')
             ->icon('heroicon-o-plus')
             ->form([
                 DatePicker::make('begin')
+                    ->label("Début de la période")
                     ->default($begin_week)
                 ,
                 DatePicker::make('end')
+                    ->label("Fin de la période")
                     ->default($end_week)
                 ,
             ])->action(function(array $data){

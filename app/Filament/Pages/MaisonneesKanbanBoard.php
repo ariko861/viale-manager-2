@@ -20,6 +20,12 @@ class MaisonneesKanbanBoard extends KanbanBoard
     protected static string $model = AssignationMaisonnee::class;
     protected static string $recordStatusAttribute = 'house_id';
 
+    protected static ?string $navigationLabel = 'Maisonnées';
+
+    protected static ?string $navigationGroup = 'Accueil';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static ?int $navigationSort = 10;
+
     public MaisonneesPlanning $planning;
 
     public function mount(): void
