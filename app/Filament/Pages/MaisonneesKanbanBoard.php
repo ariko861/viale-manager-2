@@ -11,6 +11,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\Reactive;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 use Illuminate\Support\Collection;
 
@@ -67,6 +68,42 @@ class MaisonneesKanbanBoard extends KanbanBoard
     protected function records(): Collection
     {
         return $this->planning->assignations;
+    }
+
+    public function getHeading(): string|Htmlable
+    {
+        return 'Maisonnées '. $this->planning?->display_name;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('reset_maisonnees')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->action(function (){
+                    $this->planning->resetPlanning();
+                })
+            ,
+            Action::make('change_planning')
+                ->color('info')
+                ->form([
+                    Select::make('plannings')
+                        ->options(MaisonneesPlanning::query()->where('end', '>=', today())->get()->mapWithKeys(function(MaisonneesPlanning $planning){
+                            return [$planning->id => $planning->display_name];
+                        }))
+                        ->selectablePlaceholder(false)
+                        ->default(fn() => $this->planning->id)
+                        ->hintAction(
+                            MaisonneesPlanning::getCreateAction(form: true),
+                        )
+                ])
+                ->modalSubmitActionLabel("Changer de planning")
+                ->action(function (array $data){
+                    $this->planning = MaisonneesPlanning::query()->findOrFail($data['plannings']);
+                    $this->planning->preparePlanning();
+                })
+        ];
     }
 
 }
