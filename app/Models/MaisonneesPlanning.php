@@ -5,10 +5,12 @@ namespace App\Models;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MaisonneesPlanning extends Model
@@ -27,6 +29,11 @@ class MaisonneesPlanning extends Model
     public function assignations(): HasMany
     {
         return $this->hasMany(AssignationMaisonnee::class, 'planning_id');
+    }
+
+    public function houses(): BelongsToMany
+    {
+        return $this->belongsToMany(House::class, 'houses_in_maisonnees_planning', 'planning_id');
     }
 
     public function displayName(): Attribute
@@ -55,6 +62,13 @@ class MaisonneesPlanning extends Model
     {
         $this->assignations()->each(fn(AssignationMaisonnee $assignation) => $assignation->update(['house_id' => 0]));
         $this->preparePlanning();
+    }
+
+    public function resetWhereNoMaisonnee(): void
+    {
+        # On remet à 0 les assignations dont la maison n'est pas dans les maisons du planning.
+        # Ceci principalement pour éviter de supprimer une maison dans le planning et de supprimer des séjours avec
+        $this->assignations()->whereNotIn('house_id', $this->houses()->pluck('id')->toArray())->update(['house_id' => 0]);
     }
 
     public static function getCreateAction(bool $form = false): Action|\Filament\Forms\Components\Actions\Action
@@ -88,11 +102,17 @@ class MaisonneesPlanning extends Model
                     ->label("Fin de la période")
                     ->default($end_week)
                 ,
+                Select::make('houses')
+                    ->label("Les maisons à utiliser pour ce planning")
+                    ->options(House::query()->isMaisonnee()->pluck('name', 'id'))
+                    ->multiple()
+                ,
             ])->action(function(array $data){
                 $planning = MaisonneesPlanning::query()->create([
                     'begin' => $data['begin'],
                     'end' => $data['end'],
                 ]);
+                $planning->houses()->attach($data['houses']);
                 $planning->preparePlanning();
             });
 

@@ -49,16 +49,24 @@ class MaisonneesKanbanBoard extends KanbanBoard
         return Action::make('create_planning')
             ->form([
                 DatePicker::make('begin')
+                    ->label("Début de la période")
                     ->default($begin_week)
                 ,
                 DatePicker::make('end')
+                    ->label("Fin de la période")
                     ->default($end_week)
+                ,
+                Select::make('houses')
+                    ->label("Les maisons à utiliser pour ce planning")
+                    ->options(House::query()->isMaisonnee()->pluck('name', 'id'))
+                    ->multiple()
                 ,
             ])->action(function(array $data){
                 $this->planning = MaisonneesPlanning::create([
                     'begin' => $data['begin'],
                     'end' => $data['end'],
                 ]);
+                $this->planning->houses()->attach($data['houses']);
                 $this->planning->preparePlanning();
             });
 
@@ -73,7 +81,11 @@ class MaisonneesKanbanBoard extends KanbanBoard
 
     protected function statuses(): Collection
     {
-        return House::prepareForKanban();
+        if ($this->planning->houses()->exists()){
+            return $this->planning->houses->prepareForKanban();
+        } else {
+            return House::prepareForKanban();
+        }
     }
 
     protected function records(): Collection
@@ -94,14 +106,20 @@ class MaisonneesKanbanBoard extends KanbanBoard
     {
         return [
             Action::make('reset_maisonnees')
+                ->label("Recommencer les maisonnées")
+                ->icon('heroicon-o-arrow-uturn-left')
                 ->color('warning')
+                ->modalHeading("Recommencer le partage des maisonnées")
+                ->modalDescription("Cette action va remettre à zéro la répartition en maisonnées, êtes-vous sûr·e ?")
                 ->requiresConfirmation()
                 ->action(function (){
                     $this->planning->resetPlanning();
                 })
             ,
             Action::make('change_planning')
+                ->label("Changer de planning")
                 ->color('info')
+                ->icon('heroicon-o-calendar-date-range')
                 ->form([
                     Select::make('plannings')
                         ->options(MaisonneesPlanning::query()->where('end', '>=', today())->get()->mapWithKeys(function(MaisonneesPlanning $planning){
@@ -118,6 +136,24 @@ class MaisonneesKanbanBoard extends KanbanBoard
                     $this->planning = MaisonneesPlanning::query()->findOrFail($data['plannings']);
                     $this->planning->preparePlanning();
                 })
+            ,
+            Action::make('modify_houses')
+                ->label("Modifier les maisons")
+                ->color('success')
+                ->icon('heroicon-o-home')
+                ->form([
+                    Select::make('houses')
+                        ->label("Les maisons à utiliser pour ce planning")
+                        ->options(House::query()->isMaisonnee()->pluck('name', 'id'))
+                        ->multiple()
+                        ->default(fn() => $this->planning->houses()->pluck('id')->toArray())
+                    ,
+                ])
+                ->action(function(array $data){
+                    $this->planning->houses()->sync($data['houses']);
+                    $this->planning->resetWhereNoMaisonnee();
+                })
+            ,
         ];
     }
 

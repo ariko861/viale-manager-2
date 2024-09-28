@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Collections\HousesCollection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -55,6 +57,16 @@ class House extends Model
         array_unshift($houses, ['id' => 0, 'title' => "à placer"]);
 
         return collect($houses);
+    }
+
+    public function scopeIsMaisonnee(Builder $query): void
+    {
+        $query->where('community', true);
+    }
+
+    public function newCollection(array $models = []): Collection
+    {
+        return new HousesCollection($models);
     }
 
 }
