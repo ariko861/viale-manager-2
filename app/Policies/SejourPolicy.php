@@ -15,6 +15,7 @@ class SejourPolicy
      */
     public function viewAny(User $user): bool
     {
+        return true;
         return $user->can('view_any_sejour');
     }
 
@@ -23,7 +24,7 @@ class SejourPolicy
      */
     public function view(User $user, Sejour $sejour): bool
     {
-        return $user->can('view_sejour');
+        return $user->can('view_sejour') || $user->visitor_id === $sejour->visitor_id;
     }
 
     /**

@@ -20,7 +20,7 @@ class Visitor extends Model
 
     public function sejours(): HasMany
     {
-        return $this->hasMany(Sejour::class);
+        return $this->hasMany(Sejour::class)->chaperone('visitor');
     }
 
 
