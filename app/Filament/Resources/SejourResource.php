@@ -38,6 +38,11 @@ class SejourResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderBy('arrival_date');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

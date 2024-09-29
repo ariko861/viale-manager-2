@@ -5,14 +5,29 @@ namespace App\Filament\Widgets;
 use App\Models\Sejour;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
+use Livewire\Attributes\Reactive;
 
 class PresencesSemaineChart extends ChartWidget
 {
-    protected static ?string $heading = 'Présences sur la semaine';
+    protected static ?string $heading = 'Présences, arrivées et départs';
 
     protected static ?string $maxHeight = '300px';
     protected static ?string $pollingInterval = null;
 
+    public bool $columnSpanFull = false;
+    public function getColumnSpan(): int|array|string
+    {
+        if ($this->columnSpanFull){
+            return 'full';
+        }
+        return $this->columnSpan;
+    }
+
+    #[Reactive]
+    public ?string $begin = null;
+
+    #[Reactive]
+    public ?string $end = null;
 
     protected static ?array $options = [
         'scales' => [
@@ -30,16 +45,16 @@ class PresencesSemaineChart extends ChartWidget
     protected function getData(): array
     {
 
-        $stackedData = [];
-        $today = today();
+        $begin = $this->begin ? Carbon::parse($this->begin) : today();
+        $end = $this->end ? Carbon::parse($this->end) : today()->addDays(6);
 
         $jours_semaine = [];
-        for ($i=0; $i < 7; $i++) {
-            # Pour chaque jour de la semaine à venir
-            $day = $today->copy()->addDays($i);
-            $jours_semaine[] = $day;
-
+        $startDate = $begin;
+        while ($startDate->lte($end)) {
+            $jours_semaine[] = $startDate->copy();
+            $startDate->addDay();
         }
+
         $countStaying = [];
         $countLeaving = [];
         $countArriving = [];

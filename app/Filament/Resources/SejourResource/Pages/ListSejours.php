@@ -70,7 +70,7 @@ class ListSejours extends ListRecords
 
             'futures arrivées' => Tab::make()
                 ->badge(fn() => Sejour::where('confirmed', true)->futurArrivals()->count())
-                ->modifyQueryUsing(fn (Builder $query) => $query->futurArrivals()->orderBy('arrival_date'))
+                ->modifyQueryUsing(fn (Builder $query) => $query->futurArrivals())
             ,
 
         ];
@@ -104,7 +104,7 @@ class ListSejours extends ListRecords
                         Tables\Columns\TextColumn::make('reservation.contact_email')
                             ->label("Email")
                             ->wrap()
-                            ->limit(10)
+                            ->limit(15)
                             ->icon('heroicon-o-envelope')
                             ->grow(false)
                             ->copyable()
