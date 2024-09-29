@@ -25,7 +25,7 @@ class SejourResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('visitor_id', Auth::user()->visitor_id)->where('departure_date', '<', today());
+        return parent::getEloquentQuery()->where('visitor_id', Auth::user()->visitor_id);
     }
 
     public static function shouldRegisterNavigation(): bool
