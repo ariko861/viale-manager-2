@@ -101,14 +101,13 @@ class ListSejours extends ListRecords
                     ])
                     ,
                     Tables\Columns\Layout\Stack::make([
-                        Tables\Columns\TextColumn::make('reservation.contact_email')
+                        Tables\Columns\TextColumn::make('email')
                             ->label("Email")
                             ->wrap()
                             ->limit(15)
                             ->icon('heroicon-o-envelope')
                             ->grow(false)
                             ->copyable()
-                            ->searchable()
                             ->sortable(),
                         Tables\Columns\TextColumn::make('reservation.contact_phone')
                             ->label("Téléphone")

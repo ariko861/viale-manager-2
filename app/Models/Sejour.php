@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Filament\Resources\RoomResource;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -47,6 +48,21 @@ class Sejour extends Model
         $departure_date = Carbon::parse($this->departure_date);
         return $departure_date->diffInDays($arrival_date, absolute: true);
     }
+
+    public function email(): Attribute
+    {
+        return Attribute::make(
+            get: fn(): string => $this->visitor?->email ?? $this->reservation?->contact_email,
+        );
+    }
+
+    public function phone(): Attribute
+    {
+        return Attribute::make(
+            get: fn(): string => $this->visitor?->phone ?? $this->reservation?->contact_phone,
+        );
+    }
+
 
     public function getTotalPriceAttribute(): float
     {
