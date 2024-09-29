@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Option;
 use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,6 +32,7 @@ class ReservationConfirmedToVisitor extends Mailable
     {
         $app_name = config('app.name');
         return new Envelope(
+            replyTo: Option::getVialeEmail(),
             subject: "[{$app_name}] Votre réservation est confirmée",
         );
     }

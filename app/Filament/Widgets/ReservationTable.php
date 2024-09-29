@@ -16,7 +16,7 @@ use Nette\Utils\Html;
 class ReservationTable extends BaseWidget
 {
 
-    protected int | string | array $columnSpan = 'full';
+//    protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
@@ -25,20 +25,25 @@ class ReservationTable extends BaseWidget
                 Reservation::query()->orderByDesc('id')
             )
             ->columns([
-                Tables\Columns\TextColumn::make('id'),
-                Tables\Columns\TextColumn::make('link_token')
-                    ->label("Lien formulaire")
+                Tables\Columns\TextColumn::make('id')
+                    ->color('info')
+                    ->description("Cliquez pour copier le lien")
+                    ->wrap()
                     ->copyable()
                     ->copyableState(fn(Reservation $record): string => $record->getLink())
-                    ->formatStateUsing(fn(Reservation $record): string => $record->getLink())
                 ,
+
                 Tables\Columns\TextColumn::make('remarques_accueil')
+                    ->wrapHeader()
+                    ->wrap()
                     ->html()
                 ,
                 Tables\Columns\ToggleColumn::make('link_sent')
+                    ->wrapHeader()
                     ->label("Lien envoyé")
                 ,
                 Tables\Columns\IconColumn::make('is_confirmed')
+                    ->wrapHeader()
                     ->label("Réservation confirmée")
                     ->boolean()
                 ,
@@ -62,10 +67,21 @@ class ReservationTable extends BaseWidget
                             ->default(5)
                             ->required()
                         ,
+                        TextInput::make('contact_email')
+                            ->label("Email de la personne de contact")
+                            ->email()
+                            ->prefixIcon('heroicon-o-envelope')
+                        ,
                         RichEditor::make('remarques_accueil'),
                     ])
                     ->action(function(array $data): void {
-                        $reservation = Reservation::createQuickReservation(max_days_change: $data['max_days_change'], max_visitors: $data["max_visitors"], remarques_accueil: $data['remarques_accueil']);
+                        $reservation = Reservation::createQuickReservation(
+                            max_days_change: $data['max_days_change'],
+                            max_visitors: $data["max_visitors"],
+                            remarques_accueil: $data['remarques_accueil']
+                        );
+                        $reservation->contact_email = $data['contact_email'];
+                        $reservation->save();
 //                        $this->lien_reservation = $reservation->getLink();
                         Notification::make('link-created')
                             ->title("Lien de réservation créé")
@@ -75,7 +91,41 @@ class ReservationTable extends BaseWidget
                             ->send()
                         ;
 
-                    }),
+                    })
+                ,
+            ])
+            ->actions([
+                Tables\Actions\Action::make('send_link')
+                    ->iconButton()
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('info')
+                    ->visible(fn(Reservation $record) : bool => $record->contact_email != null)
+                    ->requiresConfirmation()
+                    ->modalHeading("Envoi du lien de réservation")
+                    ->modalDescription(fn(Reservation $record): string => "Vous allez envoyer le lien de réservation à {$record->contact_email}, êtes-vous sûr·e ?")
+                    ->action(fn(Reservation $record) => $record->sendLink())
+                ,
+                Tables\Actions\EditAction::make()
+                    ->iconButton()
+                    ->form([
+                        TextInput::make('max_days_change')
+                            ->label('Nombre de jours de décalage possibles')
+                            ->numeric()
+                            ->default(255)
+                            ->required(),
+                        TextInput::make('max_visitors')
+                            ->label('Nombre de visiteurs maximum')
+                            ->numeric()
+                            ->default(5)
+                            ->required()
+                        ,
+                        TextInput::make('contact_email')
+                            ->label("Email de la personne de contact")
+                            ->email()
+                            ->prefixIcon('heroicon-o-envelope')
+                        ,
+                        RichEditor::make('remarques_accueil'),
+                    ])
             ])
             ;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Mail\FormulaireReservationLien;
 use App\Mail\ReservationConfirmed;
 use App\Mail\ReservationConfirmedToVisitor;
 use Illuminate\Database\Eloquent\Builder;
@@ -82,6 +83,20 @@ class Reservation extends Model
         $newReservation->remarques_accueil = $remarques_accueil;
         $newReservation->save();
         return $newReservation;
+    }
+
+    /**
+     * Fonction pour envoyer lien de la réservation à la personne de contact
+     * @return void
+     */
+    public function sendLink(): void
+    {
+        if ($this->contact_email){
+            $this->authorize_edition = true;
+            Mail::to($this->contact_email)->queue(new FormulaireReservationLien($this));
+            $this->link_sent = true;
+            $this->save();
+        }
     }
 
     public function scopeIsConfirmed(Builder $query): void
