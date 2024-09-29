@@ -105,12 +105,14 @@ class VisitorForm extends Component implements HasForms
                                 ->schema([
                                     DatePicker::make('arrival_date')
                                         ->label("Date d'arrivée")
+                                        ->hint("Date prévue de votre arrivée à la Viale")
                                         ->required()
                                         ->live()
                                         ->minDate(today())
                                         ->afterStateUpdated(fn ($state) => $this->arrival_date = $state),
                                     DatePicker::make('departure_date')
                                         ->label("Date de départ")
+                                        ->hint("Date prévue de votre départ de la Viale")
                                         ->required()
                                         ->live()
                                         ->minDate(fn() => $this->arrival_date)
@@ -211,11 +213,15 @@ class VisitorForm extends Component implements HasForms
                                                 ->schema([
                                                     DatePicker::make('arrival_date')
                                                         ->required()
+                                                        ->label("Arrivée")
+                                                        ->hint("Date prévue de votre arrivée à la Viale")
                                                         ->live()
                                                         ->minDate(today())
                                                         ->default($this->arrival_date),
                                                     DatePicker::make('departure_date')
                                                         ->required()
+                                                        ->label("Départ")
+                                                        ->hint("Date prévue de votre départ de la Viale")
                                                         ->minDate(fn(Get $get) => $get('arrival_date'))
                                                         ->default($this->departure_date),
                                                 ]),

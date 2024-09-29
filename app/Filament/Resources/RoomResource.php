@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RoomResource\Pages;
 use App\Filament\Resources\RoomResource\RelationManagers;
 use App\Models\Room;
+use App\Models\Sejour;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Concerns\Translatable;
@@ -54,14 +55,26 @@ class RoomResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('house.name')
+                    ->label("Maison")
                     ->sortable()
                     ->icon('heroicon-o-home')
                 ,
                 Tables\Columns\TextColumn::make('name')
+                    ->label("Nom")
                     ->searchable(),
                 Tables\Columns\TextColumn::make('beds')
+                    ->label("Lits")
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('occupants')
+                    ->label("Occupants")
+                    ->getStateUsing(function(Room $record) {
+                        return $record->sejours->map(function (Sejour $sejour) {
+                            return $sejour->visitor->full_name;
+                        });
+                    })
+                    ->listWithLineBreaks()
+                ,
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -22,7 +22,7 @@ class VisitorResource extends Resource
     protected static ?string $model = Visitor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
-    protected static ?string $navigationGroup = "Accueil";
+//    protected static ?string $navigationGroup = "Accueil";
     protected static ?string $modelLabel = "Visiteur";
 
     public static function form(Form $form): Form

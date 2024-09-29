@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Option;
 use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,7 +11,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ReservationConfirmed extends Mailable
+class FormulaireReservationLien extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -18,7 +19,7 @@ class ReservationConfirmed extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        protected Reservation $reservation
+        protected Reservation $reservation,
     )
     {
         //
@@ -31,10 +32,11 @@ class ReservationConfirmed extends Mailable
     {
         $app_name = config('app.name');
         return new Envelope(
-            replyTo: $this->reservation?->contact_email,
-            subject: "[{$app_name}] Reservation confirmée",
+            replyTo: Option::getVialeEmail(),
+            subject: "[{$app_name}] Lien du Formulaire de Réservation",
         );
     }
+
 
     /**
      * Get the message content definition.
@@ -42,8 +44,8 @@ class ReservationConfirmed extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.reservation-confirmed',
-            with: ['reservation' => $this->reservation]
+            markdown: 'mail.formulaire-reservation-lien',
+            with: ['reservation' => $this->reservation],
         );
     }
 

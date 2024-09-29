@@ -6,6 +6,7 @@ use App\Filament\Resources\RoomResource;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -49,6 +50,21 @@ class Sejour extends Model
         return $departure_date->diffInDays($arrival_date, absolute: true);
     }
 
+    public function email(): Attribute
+    {
+        return Attribute::make(
+            get: fn(): string => $this->visitor?->email ?? $this->reservation?->contact_email,
+        );
+    }
+
+    public function phone(): Attribute
+    {
+        return Attribute::make(
+            get: fn(): string => $this->visitor?->phone ?? $this->reservation?->contact_phone,
+        );
+    }
+
+
     public function getTotalPriceAttribute(): float
     {
         return $this->nuits * ($this->price ?? 0 );
@@ -73,10 +89,13 @@ class Sejour extends Model
      * @param Carbon $endDate
      * @return void
      */
-    public function scopeWithinDates(Builder $query, Carbon|string $startDate, Carbon|string $endDate): void {
-        $query->whereDate('arrival_date', '<=', $endDate)
-            ->where(function (Builder $q) use ($startDate){
-                $q->whereDate('departure_date', '>=', $startDate)
+    public function scopeWithinDates(Builder $query, Carbon|string $startDate, Carbon|string $endDate, bool $excludeArrivals = false, bool $excludeDepartures = false): void {
+        $lessOperator = $excludeArrivals ? '<' : '<=';
+        $moreOperator = $excludeDepartures ? '>' : '>=';
+
+        $query->whereDate('arrival_date', $lessOperator, $endDate)
+            ->where(function (Builder $q) use ($startDate, $moreOperator){
+                $q->whereDate('departure_date', $moreOperator, $startDate)
                     ->orWhereNull('departure_date');
             });
     }

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Filament\Pages\MaisonneesKanbanBoard;
 use App\Filament\Resources\MessageResource;
 use App\Filament\Resources\OptionResource;
 use App\Filament\Resources\ProfileResource;
@@ -59,6 +60,7 @@ class ExampleTest extends TestCase
         $this->get(RoomResource::getUrl())->assertForbidden();
         $this->get(UserResource::getUrl())->assertForbidden();
         $this->get(RoleResource::getUrl())->assertForbidden();
+        $this->get(MaisonneesKanbanBoard::getUrl())->assertForbidden();
 
         $user->delete();
         $role->delete();

@@ -26,6 +26,8 @@ class Stats extends Page implements HasForms, HasTable
 
     protected static string $view = 'filament.pages.stats';
 
+    protected static ?int $navigationSort = 15;
+
     public function table(Table $table): Table
     {
         $today = today();

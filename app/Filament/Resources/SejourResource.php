@@ -34,9 +34,14 @@ class SejourResource extends Resource
 {
     protected static ?string $model = Sejour::class;
     protected static ?string $modelLabel = "Séjour";
-    protected static ?string $navigationGroup = "Accueil";
+//    protected static ?string $navigationGroup = "Accueil";
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderBy('arrival_date');
+    }
 
     public static function form(Form $form): Form
     {
@@ -56,6 +61,14 @@ class SejourResource extends Resource
                             ->disabledOn('edit')
                         ,
                         Forms\Components\TextInput::make('prenom')
+                            ->required()
+                            ->disabledOn('edit')
+                        ,
+                        Forms\Components\TextInput::make('email')
+                            ->required()
+                            ->disabledOn('edit')
+                        ,
+                        Forms\Components\TextInput::make('phone')
                             ->required()
                             ->disabledOn('edit')
                         ,

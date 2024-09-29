@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SejourResource\Pages;
 
 use App\Filament\Custom\SejourFilters;
 use App\Filament\Resources\SejourResource;
+use App\Filament\Widgets\PresencesSemaineChart;
 use App\Filament\Widgets\ReservationTable;
 use App\Models\Reservation;
 use App\Models\Sejour;
@@ -45,6 +46,7 @@ class ListSejours extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
+            PresencesSemaineChart::class,
            ReservationTable::class,
         ];
     }
@@ -82,53 +84,63 @@ class ListSejours extends ListRecords
             ->columns([
                 Split::make([
 
-                Tables\Columns\ColorColumn::make('reservation')
-                    ->state(fn(Sejour $record) => $record->reservation->getColor())
-                ,
-                Tables\Columns\Layout\Stack::make([
-
-                    Tables\Columns\TextColumn::make('visitor.nom')
-                        ->label("Nom")
-                        ->formatStateUsing(fn (string $state): string => Str::upper($state))
-                        ->searchable()
-                        ->sortable(),
-                    Tables\Columns\TextColumn::make('visitor.prenom')
-                        ->label("Prénom")
-                        ->searchable()
-                        ->sortable(),
-                ]),
-                Tables\Columns\IconColumn::make('confirmed')
-                    ->boolean()
-                    ->tooltip("Confirmé ?")
+                    Tables\Columns\ColorColumn::make('reservation')
+                        ->state(fn(Sejour $record) => $record->reservation->getColor())
                     ,
-//                Tables\Columns\ToggleColumn::make('remove_from_stats'),
-                        Tables\Columns\Layout\Stack::make([
-                            Tables\Columns\TextColumn::make('arrival_date')
-                                ->label("Date d'arrivée")
-                                ->date('D j F Y')
-                                ->sortable(),
-                            Tables\Columns\TextColumn::make('departure_date')
-                                ->label("Date de départ")
-                                ->date('D j F Y')
-                                ->sortable(),
-                        ]),
-                        Tables\Columns\TextColumn::make('room.full_name')
+                    Tables\Columns\Layout\Stack::make([
+
+                        Tables\Columns\TextColumn::make('visitor.nom')
+                            ->label("Nom")
+                            ->formatStateUsing(fn (string $state): string => Str::upper($state))
+                            ->searchable()
+                            ->sortable(),
+                        Tables\Columns\TextColumn::make('visitor.prenom')
+                            ->label("Prénom")
+                            ->searchable()
+                            ->sortable(),
+                    ])
+                    ,
+                    Tables\Columns\Layout\Stack::make([
+                        Tables\Columns\TextColumn::make('email')
+                            ->label("Email")
                             ->wrap()
-                        ,
-                        Tables\Columns\TextColumn::make('price')
-                            ->label("Prix choisi")
-                            ->money('eur'),
-//                    Tables\Columns\TextColumn::make('created_at')
-//                        ->dateTime()
-//                        ->sortable()
-//                        ->toggleable(isToggledHiddenByDefault: true),
-//                    Tables\Columns\TextColumn::make('updated_at')
-//                        ->dateTime()
-//                        ->sortable()
-//                        ->toggleable(isToggledHiddenByDefault: true),
+                            ->limit(15)
+                            ->icon('heroicon-o-envelope')
+                            ->grow(false)
+                            ->copyable()
+                            ->sortable(),
+                        Tables\Columns\TextColumn::make('reservation.contact_phone')
+                            ->label("Téléphone")
+                            ->grow(false)
+                            ->copyable()
+                            ->icon('heroicon-o-phone')
+                            ->sortable(),
+                    ]),
+                    Tables\Columns\IconColumn::make('confirmed')
+                        ->boolean()
+                        ->tooltip("Confirmé ?")
+                    ,
+                    Tables\Columns\Layout\Stack::make([
+                        Tables\Columns\TextColumn::make('arrival_date')
+                            ->label("Date d'arrivée")
+                            ->date('D j F Y')
+                            ->sortable(),
+                        Tables\Columns\TextColumn::make('departure_date')
+                            ->label("Date de départ")
+                            ->date('D j F Y')
+                            ->sortable(),
+                    ]),
+                    Tables\Columns\TextColumn::make('room.full_name')
+                        ->wrap()
+                    ,
+                    Tables\Columns\TextColumn::make('price')
+                        ->label("Prix choisi")
+                        ->money('eur'),
+
                 ]),
 
             ])
+
             ->defaultSort('arrival_date')
             ->groups([
                 Tables\Grouping\Group::make('reservation.id')
@@ -182,6 +194,9 @@ class ListSejours extends ListRecords
                     ->columnSpanFull()
                 ,
             ])
+            ->recordUrl(
+                null
+            )
             ->actions([
                 Tables\Actions\Action::make('select_room')
 //                    ->visible(fn(Sejour $record) => !$record->room()->exists() )
