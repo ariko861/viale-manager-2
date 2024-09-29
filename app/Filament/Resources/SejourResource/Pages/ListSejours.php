@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SejourResource\Pages;
 
 use App\Filament\Custom\SejourFilters;
 use App\Filament\Resources\SejourResource;
+use App\Filament\Widgets\PresencesSemaineChart;
 use App\Filament\Widgets\ReservationTable;
 use App\Models\Reservation;
 use App\Models\Sejour;
@@ -45,6 +46,7 @@ class ListSejours extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
+            PresencesSemaineChart::class,
            ReservationTable::class,
         ];
     }
