@@ -46,14 +46,14 @@ class MaisonneesKanbanBoard extends KanbanBoard
         if ($id){
             $this->planning = MaisonneesPlanning::query()->find($id);
             $this->planning->preparePlanning();
-        } elseif (MaisonneesPlanning::query()->current()->count() === 0) {
+        } elseif (MaisonneesPlanning::query()->whereDate('end', '>=', today())->count() === 0) {
             $this->defaultAction = 'onboarding';
             $planning = new MaisonneesPlanning();
             $planning->begin = today();
             $planning->end = today();
             $this->planning = $planning;
         } else {
-            $this->planning = MaisonneesPlanning::query()->current()->first();
+            $this->planning = MaisonneesPlanning::query()->whereDate('end', '>=', today())->orderBy('end')->first();
             $this->planning->preparePlanning();
         }
     }
@@ -132,7 +132,7 @@ class MaisonneesKanbanBoard extends KanbanBoard
                 ->icon('heroicon-o-calendar-date-range')
                 ->form([
                     Select::make('plannings')
-                        ->options(MaisonneesPlanning::query()->where('end', '>=', today())->get()->mapWithKeys(function(MaisonneesPlanning $planning){
+                        ->options(MaisonneesPlanning::query()->where('end', '>=', today())->orderBy('end')->get()->mapWithKeys(function(MaisonneesPlanning $planning){
                             return [$planning->id => $planning->display_name];
                         }))
                         ->selectablePlaceholder(false)

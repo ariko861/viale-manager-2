@@ -92,7 +92,7 @@ class MaisonneesPlanning extends Model
             $action = Action::class;
         }
         $plannings = self::query();
-        if ($plannings->count() === 0){
+        if ($plannings->count() === 0 || $plannings->current()->count() === 0){
             $begin_week = Carbon::today()->startOfWeek();
             $end_week = Carbon::today()->endOfWeek();
         } else {
