@@ -17,17 +17,19 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 use Illuminate\Support\Collection;
 
 class MaisonneesKanbanBoard extends KanbanBoard
 {
-
     use HasPageShield;
     protected static string $model = AssignationMaisonnee::class;
     protected static string $recordStatusAttribute = 'house_id';
+    protected static ?string $slug = 'maisonnees/{id?}';
 
     protected static ?string $navigationLabel = 'Maisonnées';
 //    public bool $disableEditModal = true;
@@ -38,9 +40,13 @@ class MaisonneesKanbanBoard extends KanbanBoard
 
     public MaisonneesPlanning $planning;
 
-    public function mount(): void
+
+    public function mount(?int $id = null): void
     {
-        if (MaisonneesPlanning::query()->current()->count() === 0) {
+        if ($id){
+            $this->planning = MaisonneesPlanning::query()->find($id);
+            $this->planning->preparePlanning();
+        } elseif (MaisonneesPlanning::query()->current()->count() === 0) {
             $this->defaultAction = 'onboarding';
             $planning = new MaisonneesPlanning();
             $planning->begin = today();
@@ -72,30 +78,24 @@ class MaisonneesKanbanBoard extends KanbanBoard
                     ->multiple()
                 ,
             ])->action(function(array $data){
-                $this->planning = MaisonneesPlanning::create([
+                $planning = MaisonneesPlanning::create([
                     'begin' => $data['begin'],
                     'end' => $data['end'],
                 ]);
-                $this->planning->houses()->attach($data['houses']);
-                $this->planning->preparePlanning();
+                $planning->houses()->attach($data['houses']);
+                $this->redirect(self::getUrl(['id' => $planning->id]));
             });
 
     }
 
     public function onStatusChanged(int $recordId, string $status, array $fromOrderedIds, array $toOrderedIds): void
     {
-//        dd($status);
         AssignationMaisonnee::find($recordId)->update(['house_id' => $status]);
-//        User::setNewOrder($toOrderedIds);
     }
 
     protected function statuses(): Collection
     {
-        if ($this->planning->houses()->exists()){
-            return $this->planning->houses->prepareForKanban();
-        } else {
-            return House::prepareForKanban();
-        }
+        return $this->planning->prepareHousesForKanban();
     }
 
     protected function records(): Collection
@@ -143,8 +143,8 @@ class MaisonneesKanbanBoard extends KanbanBoard
                 ])
                 ->modalSubmitActionLabel("Changer de planning")
                 ->action(function (array $data){
-                    $this->planning = MaisonneesPlanning::query()->findOrFail($data['plannings']);
-                    $this->planning->preparePlanning();
+                    $planning = MaisonneesPlanning::query()->find($data['plannings']);
+                    $this->redirect(self::getUrl(['id' => $planning->id]));
                 })
             ,
             Action::make('modify_houses')
@@ -162,6 +162,8 @@ class MaisonneesKanbanBoard extends KanbanBoard
                 ->action(function(array $data){
                     $this->planning->houses()->sync($data['houses']);
                     $this->planning->resetWhereNoMaisonnee();
+                    $this->redirect(self::getUrl(['id' => $this->planning->id]));
+
                 })
             ,
         ];

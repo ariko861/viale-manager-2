@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class MaisonneesPlanning extends Model
 {
@@ -62,6 +63,18 @@ class MaisonneesPlanning extends Model
     {
         $this->assignations()->each(fn(AssignationMaisonnee $assignation) => $assignation->update(['house_id' => 0]));
         $this->preparePlanning();
+    }
+
+    public function prepareHousesForKanban(): Collection
+    {
+        $houses = $this->houses()->select('name', 'id')->where('community', true)->without('rooms')->get()->toArray();
+        $houses = array_map(function($item){
+            $item = array_combine(['id', 'title'], [$item['id'], $item['name'].' ('.$this->assignations()->where('house_id', $item['id'])->count().')']);
+            return $item;
+        }, $houses);
+        array_unshift($houses, ['id' => 0, 'title' => "à placer (".$this->assignations()->where('house_id', 0)->count().')']);
+
+        return collect($houses);
     }
 
     public function resetWhereNoMaisonnee(): void
