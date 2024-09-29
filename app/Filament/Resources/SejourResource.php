@@ -34,7 +34,7 @@ class SejourResource extends Resource
 {
     protected static ?string $model = Sejour::class;
     protected static ?string $modelLabel = "Séjour";
-    protected static ?string $navigationGroup = "Accueil";
+//    protected static ?string $navigationGroup = "Accueil";
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 

@@ -32,7 +32,7 @@ class MaisonneesKanbanBoard extends KanbanBoard
     protected static ?string $navigationLabel = 'Maisonnées';
 //    public bool $disableEditModal = true;
 
-    protected static ?string $navigationGroup = 'Accueil';
+//    protected static ?string $navigationGroup = 'Accueil';
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?int $navigationSort = 10;
 
