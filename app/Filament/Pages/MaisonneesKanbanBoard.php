@@ -44,7 +44,7 @@ class MaisonneesKanbanBoard extends KanbanBoard
     public function mount(?int $id = null): void
     {
         if ($id){
-            $this->planning = MaisonneesPlanning::query()->find($id);
+            $this->planning = MaisonneesPlanning::query()->findOrFail($id);
             $this->planning->preparePlanning();
         } elseif (MaisonneesPlanning::query()->whereDate('end', '>=', today())->count() === 0) {
             $this->defaultAction = 'onboarding';
