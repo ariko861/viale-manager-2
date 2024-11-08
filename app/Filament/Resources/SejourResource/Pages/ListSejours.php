@@ -27,6 +27,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
@@ -199,7 +200,7 @@ class ListSejours extends ListRecords
             )
             ->actions([
                 Tables\Actions\Action::make('select_room')
-//                    ->visible(fn(Sejour $record) => !$record->room()->exists() )
+                    ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
                     ->color('info')
                     ->iconButton()
                     ->icon('heroicon-o-home')
@@ -209,7 +210,7 @@ class ListSejours extends ListRecords
                         $this->dispatch('select-room', [$startDate, $endDate, $record->id]);
                     }),
                 Tables\Actions\Action::make('edit_dates')
-//                    ->visible(fn(Sejour $record) => !$record->room()->exists() )
+                    ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
                     ->color('warning')
                     ->iconButton()
                     ->icon('heroicon-o-calendar-days')
