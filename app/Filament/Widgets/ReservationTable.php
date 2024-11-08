@@ -7,6 +7,7 @@ use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -73,6 +74,10 @@ class ReservationTable extends BaseWidget
                             ->email()
                             ->prefixIcon('heroicon-o-envelope')
                         ,
+                        Toggle::make('all_mails_required')
+                            ->default(false)
+                            ->label("Exiger les emails de tous les inscrits")
+                        ,
                         RichEditor::make('remarques_accueil'),
                     ])
                     ->action(function(array $data): void {
@@ -119,6 +124,10 @@ class ReservationTable extends BaseWidget
                             ->numeric()
                             ->default(5)
                             ->required()
+                        ,
+                        Toggle::make('all_mails_required')
+                            ->default(false)
+                            ->label("Exiger les emails de tous les inscrits")
                         ,
                         TextInput::make('contact_email')
                             ->label("Email de la personne de contact")

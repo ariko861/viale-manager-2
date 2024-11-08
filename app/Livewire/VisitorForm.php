@@ -151,6 +151,7 @@ class VisitorForm extends Component implements HasForms
                                                         ->helperText("Optionnel, permet de retrouver vos informations")
                                                         ->disabled(fn(Get $get) => $get('visitor_id') )
                                                         ->live(debounce: 750)
+                                                        ->required($this->reservation?->all_mails_required ?? false)
                                                         ->afterStateUpdated(function(string $state){
                                                             $this->existing_visitors = Visitor::where('email', $state)->get();
 

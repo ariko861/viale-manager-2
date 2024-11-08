@@ -18,7 +18,16 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ["confirmed_at", "remarques_accueil", "remarques_visiteur", "link_sent", "authorize_edition", "contact_email", "contact_phone"];
+    protected $fillable = [
+        "confirmed_at",
+        "remarques_accueil",
+        "remarques_visiteur",
+        "link_sent",
+        "authorize_edition",
+        "contact_email",
+        "contact_phone",
+        'all_mails_required',
+    ];
     protected $attributes = [
         'max_days_change' => 255,
         'max_visitors' => 5
