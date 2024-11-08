@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Resources\SejourResource;
 use App\Models\Sejour;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Carbon\Carbon;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -18,6 +19,7 @@ use Saade\FilamentFullCalendar\Widgets\FullCalendarWidget;
 class CalendarWidget extends FullCalendarWidget
 {
 
+    use HasWidgetShield;
     public string|null|\Illuminate\Database\Eloquent\Model $model = Sejour::class;
     protected static ?int $sort = 10;
 

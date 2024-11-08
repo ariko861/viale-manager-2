@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Reservation;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
@@ -15,7 +16,7 @@ use Nette\Utils\Html;
 
 class ReservationTable extends BaseWidget
 {
-
+    use HasWidgetShield;
 //    protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table

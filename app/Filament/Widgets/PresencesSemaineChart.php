@@ -3,12 +3,14 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Sejour;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Livewire\Attributes\Reactive;
 
 class PresencesSemaineChart extends ChartWidget
 {
+    use HasWidgetShield;
     protected static ?string $heading = 'Présences, arrivées et départs';
 
     protected static ?string $maxHeight = '300px';

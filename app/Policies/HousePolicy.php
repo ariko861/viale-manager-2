@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Sejour;
+use App\Models\House;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SejourPolicy
+class HousePolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class SejourPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_sejour');
+        return $user->can('view_any_house');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Sejour $sejour): bool
+    public function view(User $user, House $house): bool
     {
-        return $user->can('view_sejour') || ($user->visitor_id === $sejour->visitor_id && $sejour->departure_date < today());
+        return $user->can('view_house');
     }
 
     /**
@@ -31,23 +31,23 @@ class SejourPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_sejour');
+        return $user->can('create_house');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Sejour $sejour): bool
+    public function update(User $user, House $house): bool
     {
-        return $user->can('update_sejour');
+        return $user->can('update_house');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Sejour $sejour): bool
+    public function delete(User $user, House $house): bool
     {
-        return $user->can('delete_sejour');
+        return $user->can('delete_house');
     }
 
     /**
@@ -55,13 +55,13 @@ class SejourPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_sejour');
+        return $user->can('delete_any_house');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Sejour $sejour): bool
+    public function forceDelete(User $user, House $house): bool
     {
         return $user->can('{{ ForceDelete }}');
     }
@@ -77,7 +77,7 @@ class SejourPolicy
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Sejour $sejour): bool
+    public function restore(User $user, House $house): bool
     {
         return $user->can('{{ Restore }}');
     }
@@ -93,7 +93,7 @@ class SejourPolicy
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Sejour $sejour): bool
+    public function replicate(User $user, House $house): bool
     {
         return $user->can('{{ Replicate }}');
     }

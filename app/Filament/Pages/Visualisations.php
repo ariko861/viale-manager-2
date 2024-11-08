@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\PresencesSemaineChart;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
@@ -10,6 +11,7 @@ use Filament\Pages\Page;
 
 class Visualisations extends Page
 {
+    use HasPageShield;
     protected static ?string $navigationIcon = 'heroicon-o-eye';
     protected static string $view = 'filament.pages.visualisations';
 

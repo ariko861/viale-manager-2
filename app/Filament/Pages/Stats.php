@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Sejour;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -21,6 +22,7 @@ class Stats extends Page implements HasForms, HasTable
 {
     use InteractsWithForms;
     use InteractsWithTable;
+    use HasPageShield;
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $title = "Statistiques";
 
