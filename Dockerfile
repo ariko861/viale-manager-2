@@ -23,10 +23,6 @@ ENV ENVIRONNEMENT=PROD
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && composer install --optimize-autoloader #--no-dev --optimize-autoloader \
 # Expose port 80 for Apache \
-RUN php artisan clear-compiled
-RUN php artisan cache:clear
-RUN php artisan optimize
-RUN php artisan filament:cache-components
 EXPOSE 80
 
 
