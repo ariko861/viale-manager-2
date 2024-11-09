@@ -136,6 +136,10 @@ class ReservationTable extends BaseWidget
                         ,
                         RichEditor::make('remarques_accueil'),
                     ])
+                ,
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->visible(fn(Reservation $record) => !$record->is_confirmed && !$record->link_sent)
             ])
             ;
     }
