@@ -201,6 +201,7 @@ class ListSejours extends ListRecords
             ->actions([
                 # Action pour choisir la chambre
                 Tables\Actions\Action::make('select_room')
+                    ->label("Sélectionner une chambre")
                     ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
                     ->color('info')
                     ->iconButton()
@@ -212,6 +213,7 @@ class ListSejours extends ListRecords
                     }),
                 # Action pour changer les dates
                 Tables\Actions\Action::make('edit_dates')
+                    ->label("Modifier les dates")
                     ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
                     ->color('warning')
                     ->iconButton()
@@ -255,6 +257,41 @@ class ListSejours extends ListRecords
                             ->success()
                             ->send();
                     }),
+                # Action pour ajouter une absence durant le séjour
+                Tables\Actions\Action::make('add_break')
+                    ->label("Ajouter une absence")
+                    ->icon('heroicon-o-sun')
+                    ->color('warning')
+                    ->iconButton()
+                    ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
+                    ->form(fn(Sejour $record) => [
+                        DatePicker::make('begin_date')
+                            ->label("Début absence")
+                            ->required()
+                            ->live()
+                            ->minDate($record->arrival_date)
+                            ->maxDate($record->departure_date)
+                        ,
+                        DatePicker::make('end_date')
+                            ->label("Fin absence")
+                            ->required()
+                            ->live()
+                            ->minDate(fn(Get $get) => $get('begin_date'))
+                            ->maxDate($record->departure_date)
+
+                        ,
+
+                    ])
+                    ->action(function (Sejour $record, array $data) {
+                        $record->createBreak($data['begin_date'], $data['end_date']);
+                        Notification::make('break_create')
+                            ->title("Absence créée")
+                            ->icon('heroicon-o-sun')
+                            ->success()
+                            ->send();
+                    })
+                ,
+                # Action pour annuler une réservation
                 Tables\Actions\Action::make('cancel')
                     ->label("Annuler le séjour")
                     ->icon('heroicon-o-x-circle')

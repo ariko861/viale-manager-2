@@ -70,6 +70,20 @@ class Sejour extends Model
         return (Auth::user()->can('delete', $this) && ($this->departure_date >= today() || $this->departure_date === null)) || (Auth::user()->can('forceDelete', $this));
     }
 
+    public function createBreak(string|Carbon $dateBegin, string|Carbon $dateEnd): void
+    {
+        $newReservation = Reservation::createQuickReservation();
+        $newSejour = $this->replicate()->fill([
+            'arrival_date' => $dateEnd,
+            'departure_date' => $this->departure_date,
+            'reservation_id' => $newReservation->id,
+        ]);
+        $newSejour->save();
+        $this->departure_date = $dateBegin;
+        $this->save();
+
+    }
+
 
     public function getTotalPriceAttribute(): float
     {
