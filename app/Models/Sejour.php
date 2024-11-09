@@ -79,7 +79,6 @@ class Sejour extends Model
         $newSejour->save();
         $this->departure_date = $dateBegin;
         $this->save();
-
     }
 
 

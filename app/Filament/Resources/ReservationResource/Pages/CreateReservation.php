@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ReservationResource\Pages;
 
 use App\Filament\Resources\ReservationResource;
 use App\Models\Profile;
+use App\Models\Visitor;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Checkbox;
@@ -39,6 +40,7 @@ class CreateReservation extends CreateRecord
                         ->live()
                         ->afterStateUpdated(fn ($state) => $this->arrival_date = $state),
                     DatePicker::make('departure_date')
+                        ->minDate(fn(Get $get) => $get('arrival_date'))
                         ->disabled(fn (Get $get) => $get('no_departure_date') == true)
                         ->required(fn (Get $get) => $get('no_departure_date') == false)
                         ->afterStateUpdated(fn ($state) => $this->departure_date = $state),
@@ -59,6 +61,8 @@ class CreateReservation extends CreateRecord
                         ->schema([
                             Select::make("visitor_id")
                                 ->relationship("visitor", "nom")
+                                ->searchable(['nom', 'prenom', 'email'])
+                                ->getOptionLabelFromRecordUsing(fn(Visitor $record) => "{$record->prenom} {$record->nom}, {$record->email}")
                                 ->createOptionForm([
                                     TextInput::make('nom')
                                         ->required(),
