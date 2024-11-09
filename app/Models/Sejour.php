@@ -72,11 +72,9 @@ class Sejour extends Model
 
     public function createBreak(string|Carbon $dateBegin, string|Carbon $dateEnd): void
     {
-        $newReservation = Reservation::createQuickReservation();
         $newSejour = $this->replicate()->fill([
             'arrival_date' => $dateEnd,
             'departure_date' => $this->departure_date,
-            'reservation_id' => $newReservation->id,
         ]);
         $newSejour->save();
         $this->departure_date = $dateBegin;
