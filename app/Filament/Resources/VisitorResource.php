@@ -9,12 +9,15 @@ use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class VisitorResource extends Resource
@@ -177,7 +180,86 @@ class VisitorResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('merge_visitors')
+                        ->label("Fusionner les visiteurs")
+                        ->color('warning')
+                        ->icon('heroicon-o-arrow-path')
+                        ->form(function(Collection $records){
+                            $visitors_referencable = Visitor::lookReferenceForMerge($records->pluck('id')->toArray());
+                            return [
+                                Forms\Components\Select::make('ref_visitor')
+                                    ->label("Visiteur de référence")
+                                    ->hint("Choisir le visiteur qui remplacera tous les autres")
+                                    ->live()
+                                    ->required()
+                                    ->options($visitors_referencable->mapWithKeys(function(Visitor $visitor){
+                                        return [$visitor->id => "{$visitor->prenom} {$visitor->nom}, {$visitor->email}, {$visitor->phone}, {$visitor->date_de_naissance}, dernier départ: {$visitor->last_sejour?->departure_date}"];
+                                    }))
+                                    ->afterStateUpdated(function(Forms\Set $set, $state){
+                                        $visitor = Visitor::query()->find($state);
+                                        if (!$visitor) return;
+                                        $set('nom', $visitor->nom);
+                                        $set('prenom', $visitor->prenom);
+                                        $set('email', $visitor->email);
+                                        $set('phone', $visitor->phone);
+                                        $set('date_de_naissance', $visitor->date_de_naissance);
+                                        $set('remarques', $visitor->remarques);
+
+                                    })
+                                ,
+                                Fieldset::make('fields')
+                                    ->label("Nouvelles coordonnées")
+                                    ->visible(fn(Get $get) => $get('ref_visitor'))
+                                    ->schema([
+                                        Forms\Components\TextInput::make('nom')
+                                            ->maxLength(255)
+                                            ->required()
+                                        ,
+                                        Forms\Components\TextInput::make('prenom')
+                                            ->maxLength(255)
+                                            ->required()
+                                        ,
+                                        Forms\Components\TextInput::make('email')
+                                            ->maxLength(255)
+                                            ->disabled(fn(Get $get) => $get('ref_visitor') ? Visitor::query()->findOrFail($get('ref_visitor'))?->email : false)
+                                            ->dehydrated()
+                                            ->required()
+                                        ,
+                                        Forms\Components\TextInput::make('phone')
+                                            ->maxLength(255)
+                                            ->tel()
+                                            ->required()
+                                        ,
+                                        Forms\Components\DatePicker::make('date_de_naissance')
+                                            ->required()
+                                        ,
+                                        Forms\Components\Textarea::make('remarques')
+                                            ->columnSpanFull()
+                                        ,
+                                    ]),
+
+
+                            ];
+
+                        })
+                        ->action(function(array $data, \Illuminate\Support\Collection $records){
+                            $ref_visitor = Visitor::query()->find($data['ref_visitor']);
+                            if (!$ref_visitor) return;
+                            $ref_visitor->update([
+                                'nom' => $data['nom'],
+                                'prenom' => $data['prenom'],
+                                'email' => $data['email'],
+                                'phone' => $data['phone'],
+                                'date_de_naissance' => $data['date_de_naissance'],
+                                'remarques' => $data['remarques'],
+                            ]);
+                            # On merge les visiteurs
+                            Visitor::mergeVisitors($records->pluck('id')->toArray(), $ref_visitor->id);
+                            Notification::make('merge_success')
+                                ->title("Les visiteurs ont bien été fusionnés")
+                                ->success()
+                                ->send();
+                        })
                 ]),
             ])
             ->emptyStateActions([
