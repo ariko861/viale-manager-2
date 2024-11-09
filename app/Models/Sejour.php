@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Auth;
 
 class Sejour extends Model
 {
@@ -53,7 +54,7 @@ class Sejour extends Model
     public function email(): Attribute
     {
         return Attribute::make(
-            get: fn(): string => $this->visitor?->email ?? $this->reservation?->contact_email,
+            get: fn(): ?string => $this->visitor?->email ?? $this->reservation?->contact_email,
         );
     }
 
@@ -62,6 +63,11 @@ class Sejour extends Model
         return Attribute::make(
             get: fn(): string => $this->visitor?->phone ?? $this->reservation?->contact_phone,
         );
+    }
+
+    public function isDeletable(): bool
+    {
+        return (Auth::user()->can('delete', $this) && ($this->departure_date >= today() || $this->departure_date === null)) || (Auth::user()->can('forceDelete', $this));
     }
 
 

@@ -199,6 +199,7 @@ class ListSejours extends ListRecords
                 null
             )
             ->actions([
+                # Action pour choisir la chambre
                 Tables\Actions\Action::make('select_room')
                     ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
                     ->color('info')
@@ -209,6 +210,7 @@ class ListSejours extends ListRecords
                         $endDate = $record->departure_date;
                         $this->dispatch('select-room', [$startDate, $endDate, $record->id]);
                     }),
+                # Action pour changer les dates
                 Tables\Actions\Action::make('edit_dates')
                     ->visible(fn(Sejour $record) => Auth::user()->can('update', $record) )
                     ->color('warning')
@@ -253,13 +255,29 @@ class ListSejours extends ListRecords
                             ->success()
                             ->send();
                     }),
-
+                Tables\Actions\Action::make('cancel')
+                    ->label("Annuler le séjour")
+                    ->icon('heroicon-o-x-circle')
+                    ->iconButton()
+                    ->visible(fn(Sejour $record) => $record->isDeletable() )
+                    ->color('danger')
+                    ->modalHeading("Annulation du séjour")
+                    ->modalDescription(fn(Sejour $record): string => "Vous allez annuler le séjour de {$record->visitor?->prenom} {$record->visitor?->nom}, êtes-vous sûr·e ?")
+                    ->action(function (Sejour $record) {
+                        $record->delete();
+                        Notification::make('sejour-canceled')
+                            ->title("Séjour annulé")
+                            ->body("Vous avez annulé le séjour de {$record->visitor?->prenom} {$record->visitor?->nom}")
+                            ->warning()
+                            ->send()
+                        ;
+                    })
+                ,
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateActions([
