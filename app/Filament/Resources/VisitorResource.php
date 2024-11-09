@@ -19,6 +19,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class VisitorResource extends Resource
 {
@@ -180,7 +181,9 @@ class VisitorResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    # Option pour fusionner des visiteurs
                     Tables\Actions\BulkAction::make('merge_visitors')
+                        ->visible(Auth::user()->can('deleteAny', Visitor::class))
                         ->label("Fusionner les visiteurs")
                         ->color('warning')
                         ->icon('heroicon-o-arrow-path')
