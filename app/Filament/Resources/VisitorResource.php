@@ -255,6 +255,7 @@ class VisitorResource extends Resource
                                 'phone' => $data['phone'],
                                 'date_de_naissance' => $data['date_de_naissance'],
                                 'remarques' => $data['remarques'],
+                                'confirmed' => true,
                             ]);
                             # On merge les visiteurs
                             Visitor::mergeVisitors($records->pluck('id')->toArray(), $ref_visitor->id);
