@@ -96,6 +96,7 @@ class VisitorResource extends Resource
                     ->default()
                     ->query(fn(Builder $query) => $query->where('confirmed', true))
                 ,
+                # Filtre par âge
                 Tables\Filters\Filter::make('par_age')
                     ->label("Filtrer par âges")
                     ->form([
@@ -127,6 +128,7 @@ class VisitorResource extends Resource
                         return 'Âgés entre ' . $data['start_age'] . ' et ' . $data['end_age'] . ' ans';
                     })
                 ,
+                # Filtre par dates
                 Tables\Filters\Filter::make('has_sejour_within_dates')
                     ->form([
                         Forms\Components\DatePicker::make('begin_sejour_date')
@@ -187,6 +189,30 @@ class VisitorResource extends Resource
                         ->label("Fusionner les visiteurs")
                         ->color('warning')
                         ->icon('heroicon-o-arrow-path')
+//                        ->disabled(function(?Collection $records) {
+//                            $records->every(function(Visitor $record) use ($records){
+//                                return $record->email === $records->first()->email;
+//                            });
+//                        })
+                        ->beforeFormFilled(function(?Collection $records, $action) {
+                            if (!$records) $action->halt();
+                            $similars = $records->every(function(Visitor $record) use ($records){
+                                return $record->email === $records->first()->email
+                                    || $record->nom === $records->first()->nom
+                                    || $record->prenom === $records->first()->prenom;
+                            });
+                            if (!$similars) {
+
+                                Notification::make('too_different')
+                                    ->title("Les visiteurs que vous tentez de fusionner n'ont pas de champ en commun")
+                                    ->body("Pour fusionner des visiteurs, ils doivent avoir au moins leur nom, prénom ou email en commun")
+                                    ->danger()
+                                    ->send()
+                                    ;
+                                $action->halt();
+                            }
+
+                        })
                         ->form(function(Collection $records){
                             $visitors_referencable = Visitor::lookReferenceForMerge($records->pluck('id')->toArray());
                             return [
