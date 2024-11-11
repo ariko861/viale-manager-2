@@ -21,7 +21,6 @@ class RoomResource extends Resource
     protected static ?string $model = Room::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-home';
-    protected static ?string $navigationGroup = 'Configuration';
     protected static ?string $modelLabel = 'Chambre';
     protected static ?int $navigationSort = 7;
 
@@ -92,7 +91,10 @@ class RoomResource extends Resource
             ->defaultGroup('house.name')
             ->defaultSort('house.name')
             ->filters([
-                //
+                Tables\Filters\Filter::make('has_occupants')
+                    ->label("Chambres occupées")
+                    ->default()
+                    ->query(fn(Builder $query) => $query->whereHas('sejours'))
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
