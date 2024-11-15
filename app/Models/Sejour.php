@@ -81,6 +81,15 @@ class Sejour extends Model
         $this->save();
     }
 
+    public function estEnCours(): bool
+    {
+        return $this->arrival_date <= today()
+            && (
+                $this->departure_date >= today()
+                || !$this->departure_date
+            );
+    }
+
 
     public function getTotalPriceAttribute(): float
     {

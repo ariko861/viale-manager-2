@@ -207,7 +207,7 @@ class ListSejours extends ListRecords
                     ->iconButton()
                     ->icon('heroicon-o-home')
                     ->action(function (Sejour $record) {
-                        $startDate = $record->arrival_date;
+                        $startDate = $record->estEnCours() ? today() : $record->arrival_date;
                         $endDate = $record->departure_date;
                         $this->dispatch('select-room', [$startDate, $endDate, $record->id]);
                     }),
