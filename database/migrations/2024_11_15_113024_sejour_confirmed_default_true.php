@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('sejours', function (Blueprint $table) {
-            $table->boolean('confirmed')->default(true);
+            $table->boolean('confirmed')->default(true)->change();
         });
     }
 
