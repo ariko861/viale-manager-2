@@ -8,6 +8,8 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -57,29 +59,7 @@ class ReservationTable extends BaseWidget
                     ->label("Création lien formulaire")
                     ->color("success")
                     ->icon('heroicon-o-pencil')
-                    ->form([
-                        TextInput::make('max_days_change')
-                            ->label('Nombre de jours de décalage possibles')
-                            ->numeric()
-                            ->default(255)
-                            ->required(),
-                        TextInput::make('max_visitors')
-                            ->label('Nombre de visiteurs maximum')
-                            ->numeric()
-                            ->default(5)
-                            ->required()
-                        ,
-                        TextInput::make('contact_email')
-                            ->label("Email de la personne de contact")
-                            ->email()
-                            ->prefixIcon('heroicon-o-envelope')
-                        ,
-                        Toggle::make('all_mails_required')
-                            ->default(false)
-                            ->label("Exiger les emails de tous les inscrits")
-                        ,
-                        RichEditor::make('remarques_accueil'),
-                    ])
+                    ->form($this->getLienReservationForm())
                     ->action(function(array $data): void {
                         $reservation = Reservation::createQuickReservation(
                             max_days_change: $data['max_days_change'],
@@ -113,29 +93,7 @@ class ReservationTable extends BaseWidget
                 ,
                 Tables\Actions\EditAction::make()
                     ->iconButton()
-                    ->form([
-                        TextInput::make('max_days_change')
-                            ->label('Nombre de jours de décalage possibles')
-                            ->numeric()
-                            ->default(255)
-                            ->required(),
-                        TextInput::make('max_visitors')
-                            ->label('Nombre de visiteurs maximum')
-                            ->numeric()
-                            ->default(5)
-                            ->required()
-                        ,
-                        Toggle::make('all_mails_required')
-                            ->default(false)
-                            ->label("Exiger les emails de tous les inscrits")
-                        ,
-                        TextInput::make('contact_email')
-                            ->label("Email de la personne de contact")
-                            ->email()
-                            ->prefixIcon('heroicon-o-envelope')
-                        ,
-                        RichEditor::make('remarques_accueil'),
-                    ])
+                    ->form($this->getLienReservationForm())
                 ,
                 Tables\Actions\DeleteAction::make()
                     ->iconButton()
@@ -143,4 +101,51 @@ class ReservationTable extends BaseWidget
             ])
             ;
     }
+
+
+    private function getLienReservationForm(): array
+    {
+        return [
+            TextInput::make('max_days_change')
+                ->label('Nombre de jours de décalage possibles')
+                ->numeric()
+                ->default(255)
+                ->required(),
+            TextInput::make('max_visitors')
+                ->label('Nombre de visiteurs maximum')
+                ->numeric()
+                ->default(5)
+                ->required()
+            ,
+            TextInput::make('contact_email')
+                ->label("Email de la personne de contact")
+                ->email()
+                ->prefixIcon('heroicon-o-envelope')
+                ->required(fn(Get $get) => $get('groupe'))
+            ,
+            Toggle::make('all_mails_required')
+                ->default(false)
+                ->label("Exiger les emails de tous les inscrits")
+                ->disabled(fn(Get $get) => $get('groupe'))
+            ,
+            Toggle::make('groupe')
+                ->default(false)
+                ->label("Formulaire pour grand groupe")
+                ->helperText("Attention, le but est de fournir un formulaire simplifié, des dates et prix individuels ne pourront pas être définis")
+                ->hint("Formulaire spécial pour grands groupes, le formulaire sera simplifié et seuls les prénoms seront demandés")
+                ->live()
+                ->afterStateUpdated(function(Set $set, Get $get) {
+                    $set('all_mails_required', false);
+                    if ($get('max_visitors') <= 50) $set('max_visitors', 50);
+                })
+            ,
+            TextInput::make('nom_groupe')
+                ->label("Nom du groupe")
+                ->required(fn(Get $get) => $get('groupe'))
+                ->visible(fn(Get $get) => $get('groupe'))
+            ,
+            RichEditor::make('remarques_accueil'),
+        ];
+    }
+
 }

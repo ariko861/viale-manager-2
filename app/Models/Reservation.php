@@ -27,6 +27,8 @@ class Reservation extends Model
         "contact_email",
         "contact_phone",
         'all_mails_required',
+        'groupe',
+        'nom_groupe'
     ];
     protected $attributes = [
         'max_days_change' => 255,
