@@ -39,10 +39,12 @@ class CreateReservation extends CreateRecord
                 ->description('Pour quelles dates cette réservation est prévue ?')
                 ->schema([
                     DatePicker::make('arrival_date')
+                        ->label("Date d'arrivée")
                         ->required()
                         ->live()
                         ->afterStateUpdated(fn ($state) => $this->arrival_date = $state),
                     DatePicker::make('departure_date')
+                        ->label("Date de départ")
                         ->minDate(fn(Get $get) => $get('arrival_date'))
                         ->disabled(fn (Get $get) => $get('no_departure_date') == true)
                         ->required(fn (Get $get) => $get('no_departure_date') == false)
