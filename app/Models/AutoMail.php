@@ -23,7 +23,7 @@ class AutoMail extends Model
 
     public function sendTo(array|string $recipients): void
     {
-        Mail::to($recipients)->queue(new AutoMailSender($this));
+        Mail::to($recipients)->send(new AutoMailSender($this));
     }
 
 }

@@ -8,6 +8,7 @@ use App\Filament\Resources\AutoMailResource\RelationManagers;
 use App\Models\AutoMail;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -30,7 +31,7 @@ class AutoMailResource extends Resource
                     ->maxLength(255)
                     ->required()
                 ,
-                Forms\Components\Textarea::make('body')
+                Forms\Components\MarkdownEditor::make('body')
                     ->label("Corps du mail")
                     ->required()
                 ,
@@ -60,6 +61,21 @@ class AutoMailResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('test')
+                    ->label("Test mail")
+                    ->form([
+                        Forms\Components\TextInput::make('test-mail')
+                            ->email()
+                            ->required()
+                    ])
+                    ->icon('heroicon-o-paper-airplane')
+                    ->action(function(array $data, AutoMail $record){
+                        $record->sendTo($data['test-mail']);
+                        Notification::make()
+                            ->title("Email de test envoyé")
+                            ->success()
+                            ->send();
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

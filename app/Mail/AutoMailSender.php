@@ -40,7 +40,7 @@ class AutoMailSender extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.auto-mail',
+            markdown: 'mail.auto-mail',
             with: ['body' => $this->autoMail->body]
         );
     }
