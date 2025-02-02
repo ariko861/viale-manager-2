@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AutoMailTypes;
 use App\Mail\FormulaireReservationLien;
 use App\Mail\ReservationConfirmed;
 use App\Mail\ReservationConfirmedToVisitor;
@@ -56,6 +57,32 @@ class Reservation extends Model
         if ($this->contact_email){
             Mail::to($this->contact_email)->queue(new ReservationConfirmedToVisitor($this));
         }
+
+        $confirmationAutoMails = AutoMail::query()->where('type', AutoMailTypes::Confirmation)->where('actif', true)->get();
+
+        if (count($confirmationAutoMails)){
+            # On parcourt les automails définis
+            foreach ($confirmationAutoMails as $autoMail) {
+                $autoMail->sendTo($this->getAllMails());
+            }
+        }
+
+    }
+
+    public function getAllMails(): array
+    {
+        $recipients = [];
+        foreach ($this->sejours as $sejour)
+        {
+            if (isset($sejour->visitor->email)) {
+                $recipients[] = $sejour->visitor->email;
+            }
+        }
+        if (!in_array($this->contact_email, $recipients)){
+            $recipients[] = $this->contact_email;
+        }
+
+        return $recipients;
     }
 
     public function generateLinkToken(): void {

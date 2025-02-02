@@ -20,6 +20,7 @@ class AutoMailResource extends Resource
     protected static ?string $model = AutoMail::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope';
+    protected static ?string $navigationGroup = 'Configuration';
 
     public static function form(Form $form): Form
     {
