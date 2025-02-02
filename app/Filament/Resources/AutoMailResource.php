@@ -66,10 +66,12 @@ class AutoMailResource extends Resource
                     ->label("Test mail")
                     ->form([
                         Forms\Components\TextInput::make('test-mail')
+                            ->label("Email à qui envoyer le test")
                             ->email()
                             ->required()
                     ])
                     ->icon('heroicon-o-paper-airplane')
+                    ->color('info')
                     ->action(function(array $data, AutoMail $record){
                         $record->sendTo($data['test-mail']);
                         Notification::make()

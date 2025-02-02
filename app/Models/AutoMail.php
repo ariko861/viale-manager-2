@@ -21,9 +21,13 @@ class AutoMail extends Model
         'type' => AutoMailTypes::class,
     ];
 
-    public function sendTo(array|string $recipients): void
+    public function sendTo(array|string $recipients, bool $hidden = false): void
     {
-        Mail::to($recipients)->queue(new AutoMailSender($this));
+        if ($hidden){
+            Mail::to(Option::getVialeEmail())->bcc($recipients)->queue(new AutoMailSender($this));
+        } else {
+            Mail::to($recipients)->queue(new AutoMailSender($this));
+        }
     }
 
 }
