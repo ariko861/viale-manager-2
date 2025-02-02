@@ -35,6 +35,10 @@ class AutoMailResource extends Resource
                 Forms\Components\MarkdownEditor::make('body')
                     ->label("Corps du mail")
                     ->required()
+                    ->disableToolbarButtons([
+                        'attachFiles',
+                    ])
+
                 ,
                 Forms\Components\Select::make('type')
                     ->options(AutoMailTypes::class)
