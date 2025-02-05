@@ -91,9 +91,7 @@ class VisitorForm extends Component implements HasForms
             ->schema([
                 Section::make('Confirmation de votre réservation')
                     ->id('confirmation')
-                    ->description('prout prout')
                     ->schema([
-
                         Wizard::make([
                             Step::make('Bienvenue')
                                 ->icon('heroicon-o-home')
