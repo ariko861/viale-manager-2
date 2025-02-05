@@ -128,17 +128,17 @@ class ReservationTable extends BaseWidget
                 ->label("Exiger les emails de tous les inscrits")
                 ->disabled(fn(Get $get) => $get('groupe'))
             ,
-//            Toggle::make('groupe')
-//                ->default(false)
-//                ->label("Formulaire pour grand groupe")
-//                ->helperText("Attention, le but est de fournir un formulaire simplifié, des dates et prix individuels ne pourront pas être définis")
-//                ->hint("Formulaire spécial pour grands groupes, le formulaire sera simplifié et seuls les prénoms seront demandés")
-//                ->live()
-//                ->afterStateUpdated(function(Set $set, Get $get) {
-//                    $set('all_mails_required', false);
-//                    if ($get('max_visitors') <= 50) $set('max_visitors', 50);
-//                })
-//            ,
+            Toggle::make('groupe')
+                ->default(false)
+                ->label("Formulaire pour grand groupe")
+                ->helperText("Attention, le but est de fournir un formulaire simplifié, des dates et prix individuels ne pourront pas être définis")
+                ->hint("Formulaire spécial pour grands groupes, le formulaire sera simplifié et seuls les prénoms seront demandés")
+                ->live()
+                ->afterStateUpdated(function(Set $set, Get $get) {
+                    $set('all_mails_required', false);
+                    if ($get('max_visitors') <= 50) $set('max_visitors', 50);
+                })
+            ,
             TextInput::make('nom_groupe')
                 ->label("Nom du groupe")
                 ->required(fn(Get $get) => $get('groupe'))

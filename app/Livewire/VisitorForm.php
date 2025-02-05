@@ -91,7 +91,6 @@ class VisitorForm extends Component implements HasForms
             ->schema([
                 Section::make('Confirmation de votre réservation')
                     ->id('confirmation')
-                    ->description('prout prout')
                     ->schema([
 
                         Wizard::make([
@@ -122,119 +121,10 @@ class VisitorForm extends Component implements HasForms
                             Step::make('Visiteurs')
                                 ->icon("heroicon-o-user-group")
                                 ->description("Quelles seront les personnes présentes dans ce groupe ?")
-                                ->schema([
-                                    Repeater::make('sejours')
-                                        ->itemLabel(fn (array $state): ?string => $state['nom']." ".$state['prenom'] ?? null)
-//                                        ->relationship("sejours")
-                                        ->label("Personnes")
-                                        ->required()
-                                        ->defaultItems(1)
-                                        ->minItems(1)
-//                                        ->maxItems(1)
-                                        ->reorderable()
-
-                                        ->addAction( function(\Filament\Forms\Components\Actions\Action $action) {
-                                            return $action
-                                                ->label('Ajouter une personne')
-                                                ->icon('heroicon-o-user');
-                                        })
-                                        ->schema([
-                                            Fieldset::make("Visiteur")
-                                                ->columns(2)
-//                                                ->('heroicon-m-user-plus')
-//                                                ->compact()
-                                                ->schema([
-                                                    TextInput::make('email')
-                                                        ->columnSpanFull()
-                                                        ->prefixIcon('heroicon-o-envelope')
-                                                        ->hint("Commencez par saisir une adresse email")
-                                                        ->helperText("Optionnel, permet de retrouver vos informations")
-                                                        ->disabled(fn(Get $get) => $get('visitor_id') )
-                                                        ->live(debounce: 750)
-                                                        ->required($this->reservation?->all_mails_required ?? false)
-                                                        ->afterStateUpdated(function(string $state){
-                                                            $this->existing_visitors = Visitor::where('email', $state)->get();
-
-                                                        })
-                                                        ->email(),
-                                                    Select::make('select_visitor')
-                                                        ->columnSpanFull()
-                                                        ->label("Personnes existantes avec cet email")
-                                                        ->helperText("Nous avons trouvé cet email dans notre base de données, veuillez vérifier que vous êtes dans cette liste")
-                                                        ->visible(fn() => $this->existing_visitors?->count() > 0)
-                                                        ->prefixIcon('heroicon-o-user')
-                                                        ->options(fn() => $this->existing_visitors?->mapWithKeys(function ($visitor){
-                                                            return [$visitor->id => $visitor->full_name];
-                                                        }) )
-                                                        ->live()
-                                                        ->afterStateUpdated(function($state, Set $set){
-                                                            $visitor = Visitor::find($state);
-                                                            if ($visitor){
-                                                                $set('nom', $visitor->nom );
-                                                                $set('prenom', $visitor->prenom );
-                                                                $set('email', $visitor->email );
-                                                                $set('date_de_naissance', $visitor->date_de_naissance );
-                                                                $set('phone', $visitor->phone );
-                                                                $set('visitor_id', $visitor->id);
-                                                            } else {
-                                                                $set('visitor_id', '');
-                                                            }
-                                                        }),
-                                                    TextInput::make('nom')
-                                                        ->prefixIcon("heroicon-o-identification")
-                                                        ->disabled(fn(Get $get) => $get('visitor_id') )
-                                                        ->live()
-                                                        ->required(),
-                                                    TextInput::make('prenom')
-                                                        ->prefixIcon("heroicon-s-identification")
-                                                        ->disabled(fn(Get $get) => $get('visitor_id') )
-                                                        ->live()
-                                                        ->required(),
-                                                    DatePicker::make('date_de_naissance')
-                                                        ->prefixIcon("heroicon-o-calendar-days")
-                                                        ->required()
-                                                        ->helperText("Nous sommes surtout intéressés par votre âge")
-                                                    ,
-                                                    TextInput::make('phone')
-                                                        ->prefixIcon('heroicon-o-phone')
-                                                        ->helperText('Optionnel')
-                                                    ,
-
-                                                    Hidden::make('visitor_id'),
-                                                    Hidden::make('sejour_id'),
-                                                ]),
-                                            Section::make('dates')
-                                                ->compact()
-                                                ->description("Vous pouvez changer les dates individuellement")
-                                                ->icon('heroicon-o-calendar')
-                                                ->compact()
-                                                ->aside()
-                                                ->columns(2)
-                                                ->collapsed()
-                                                ->schema([
-                                                    DatePicker::make('arrival_date')
-                                                        ->required()
-                                                        ->label("Arrivée")
-                                                        ->hint("Date prévue de votre arrivée à la Viale")
-                                                        ->live()
-                                                        ->minDate(today())
-                                                        ->default($this->arrival_date),
-                                                    DatePicker::make('departure_date')
-                                                        ->required()
-                                                        ->label("Départ")
-                                                        ->hint("Date prévue de votre départ de la Viale")
-                                                        ->minDate(fn(Get $get) => $get('arrival_date'))
-                                                        ->default($this->departure_date),
-                                                ]),
-                                            Select::make('price')
-                                                ->label("Profil de prix")
-                                                ->prefixIcon('heroicon-o-currency-euro')
-                                                ->required()
-//                                                ->relationship('profile', 'name')
-                                                ->options(fn() => Profile::all()->mapWithKeys(function($profile) {
-                                                    return [$profile->price => $profile->name. " ".$profile->euro];
-                                                })),
-                                        ])
+                                ->schema(fn()=> $this->reservation->groupe ? [
+                                    $this->getVisitorsRepeater()
+                                ] : [
+                                    $this->getVisitorsSimpleRepeater()
                                 ])
                                 ->afterValidation(function (Get $get, Set $set){
                                     $first_visitor = array_values($get('sejours'))[0];
@@ -269,7 +159,6 @@ class VisitorForm extends Component implements HasForms
 BLADE)))
                     ]),
             ])
-//            ->model($this->reservation);
             ->statePath('data');
     }
 
@@ -328,6 +217,135 @@ BLADE)))
         ]);
         $this->reservation->confirm();
         $this->redirectRoute('confirmed', $this->reservation->link_token);
+    }
+
+
+    private function getVisitorsSimpleRepeater(): Repeater
+    {
+        return Repeater::make('sejours')
+            ->label("Personnes")
+            ->required()
+            ->defaultItems(1)
+            ->minItems(1)
+            ->reorderable()
+            ->cloneable()
+            ->simple(
+                TextInput::make('prenom')
+                    ->label("Prénom")
+                    ->required()
+            )
+            ;
+    }
+
+    private function getVisitorsRepeater(): Repeater
+    {
+        return Repeater::make('sejours')
+            ->itemLabel(fn (array $state): ?string => $state['nom']." ".$state['prenom'] ?? null)
+            ->label("Personnes")
+            ->required()
+            ->defaultItems(1)
+            ->minItems(1)
+            ->reorderable()
+            ->addAction( function(\Filament\Forms\Components\Actions\Action $action) {
+                return $action
+                    ->label('Ajouter une personne')
+                    ->icon('heroicon-o-user');
+            })
+            ->schema([
+                Fieldset::make("Visiteur")
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('email')
+                            ->columnSpanFull()
+                            ->prefixIcon('heroicon-o-envelope')
+                            ->hint("Commencez par saisir une adresse email")
+                            ->helperText("Optionnel, permet de retrouver vos informations")
+                            ->disabled(fn(Get $get) => $get('visitor_id') )
+                            ->live(debounce: 750)
+                            ->required($this->reservation?->all_mails_required ?? false)
+                            ->afterStateUpdated(function(string $state){
+                                $this->existing_visitors = Visitor::where('email', $state)->get();
+
+                            })
+                            ->email(),
+                        Select::make('select_visitor')
+                            ->columnSpanFull()
+                            ->label("Personnes existantes avec cet email")
+                            ->helperText("Nous avons trouvé cet email dans notre base de données, veuillez vérifier que vous êtes dans cette liste")
+                            ->visible(fn() => $this->existing_visitors?->count() > 0)
+                            ->prefixIcon('heroicon-o-user')
+                            ->options(fn() => $this->existing_visitors?->mapWithKeys(function ($visitor){
+                                return [$visitor->id => $visitor->full_name];
+                            }) )
+                            ->live()
+                            ->afterStateUpdated(function($state, Set $set){
+                                $visitor = Visitor::find($state);
+                                if ($visitor){
+                                    $set('nom', $visitor->nom );
+                                    $set('prenom', $visitor->prenom );
+                                    $set('email', $visitor->email );
+                                    $set('date_de_naissance', $visitor->date_de_naissance );
+                                    $set('phone', $visitor->phone );
+                                    $set('visitor_id', $visitor->id);
+                                } else {
+                                    $set('visitor_id', '');
+                                }
+                            }),
+                        TextInput::make('nom')
+                            ->prefixIcon("heroicon-o-identification")
+                            ->disabled(fn(Get $get) => $get('visitor_id') )
+                            ->live()
+                            ->required(),
+                        TextInput::make('prenom')
+                            ->prefixIcon("heroicon-s-identification")
+                            ->disabled(fn(Get $get) => $get('visitor_id') )
+                            ->live()
+                            ->required(),
+                        DatePicker::make('date_de_naissance')
+                            ->prefixIcon("heroicon-o-calendar-days")
+                            ->required()
+                            ->helperText("Nous sommes surtout intéressés par votre âge")
+                        ,
+                        TextInput::make('phone')
+                            ->prefixIcon('heroicon-o-phone')
+                            ->helperText('Optionnel')
+                        ,
+
+                        Hidden::make('visitor_id'),
+                        Hidden::make('sejour_id'),
+                    ]),
+                Section::make('dates')
+                    ->compact()
+                    ->description("Vous pouvez changer les dates individuellement")
+                    ->icon('heroicon-o-calendar')
+                    ->compact()
+                    ->aside()
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        DatePicker::make('arrival_date')
+                            ->required()
+                            ->label("Arrivée")
+                            ->hint("Date prévue de votre arrivée à la Viale")
+                            ->live()
+                            ->minDate(today())
+                            ->default($this->arrival_date),
+                        DatePicker::make('departure_date')
+                            ->required()
+                            ->label("Départ")
+                            ->hint("Date prévue de votre départ de la Viale")
+                            ->minDate(fn(Get $get) => $get('arrival_date'))
+                            ->default($this->departure_date),
+                    ]),
+                Select::make('price')
+                    ->label("Profil de prix")
+                    ->prefixIcon('heroicon-o-currency-euro')
+                    ->required()
+                    ->options(fn() => Profile::all()->mapWithKeys(function($profile) {
+                        return [$profile->price => $profile->name. " ".$profile->euro];
+                    })),
+            ]);
+
     }
 
 
