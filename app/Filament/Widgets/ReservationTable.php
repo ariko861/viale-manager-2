@@ -51,6 +51,12 @@ class ReservationTable extends BaseWidget
                     ->label("Réservation confirmée")
                     ->boolean()
                 ,
+                Tables\Columns\IconColumn::make('groupe')
+                    ->wrapHeader()
+                    ->label("Groupe")
+                    ->boolean()
+                ,
+
 
             ])
             ->defaultPaginationPageOption(5)
@@ -64,8 +70,10 @@ class ReservationTable extends BaseWidget
                         $reservation = Reservation::createQuickReservation(
                             max_days_change: $data['max_days_change'],
                             max_visitors: $data["max_visitors"],
-                            remarques_accueil: $data['remarques_accueil']
+                            remarques_accueil: $data['remarques_accueil'],
                         );
+                        $reservation->groupe = $data['groupe'] ?? false;
+                        $reservation->nom_groupe = $data['nom_groupe'] ?? "";
                         $reservation->contact_email = $data['contact_email'];
                         $reservation->save();
 //                        $this->lien_reservation = $reservation->getLink();

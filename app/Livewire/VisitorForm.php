@@ -122,14 +122,27 @@ class VisitorForm extends Component implements HasForms
                                 ->icon("heroicon-o-user-group")
                                 ->description("Quelles seront les personnes présentes dans ce groupe ?")
                                 ->schema(fn()=> $this->reservation->groupe ? [
-                                    $this->getVisitorsRepeater()
-                                ] : [
+                                    Select::make('price')
+                                        ->label("Profil de prix")
+                                        ->prefixIcon('heroicon-o-currency-euro')
+                                        ->required()
+                                        ->options(fn() => Profile::all()->mapWithKeys(function($profile) {
+                                            return [$profile->price => $profile->name. " ".$profile->euro];
+                                        })),
                                     $this->getVisitorsSimpleRepeater()
+                                ] : [
+                                    $this->getVisitorsRepeater()
                                 ])
                                 ->afterValidation(function (Get $get, Set $set){
-                                    $first_visitor = array_values($get('sejours'))[0];
-                                    $set('contact_email', $first_visitor['email']);
-                                    $set('contact_phone', $first_visitor['phone']);
+                                    if ($this->reservation->groupe) {
+                                        $set('contact_email', $this->reservation->contact_email);
+
+                                    } else {
+
+                                        $first_visitor = array_values($get('sejours'))[0];
+                                        $set('contact_email', $first_visitor['email']);
+                                        $set('contact_phone', $first_visitor['phone']);
+                                    }
                                 })
                             ,
 
@@ -167,7 +180,43 @@ BLADE)))
         $data = $this->form->getState();
 //        dd($data);
 
+        if ($this->reservation->groupe){
+            $this->createGroupeSejours($data);
+        } else {
+            $this->createSejours($data);
+        }
+
 //        $this->reservation->sejours()->delete();
+
+        $this->reservation->update([
+            'remarques_visiteur' => $data['remarques_visiteur'],
+            'contact_email' => $data['contact_email'],
+            'contact_phone' => $data['contact_phone'],
+        ]);
+        $this->reservation->confirm();
+        $this->redirectRoute('confirmed', $this->reservation->link_token);
+    }
+
+    private function createGroupeSejours(array $data): void
+    {
+        foreach ($data["sejours"] as $prenom) {
+            $visitor = Visitor::query()->create([
+                'nom' => $this->reservation->nom_groupe,
+                'prenom' => $prenom
+            ]);
+            Sejour::create([
+                'arrival_date' => $data["arrival_date"],
+                'departure_date' => $data["departure_date"],
+                'price' => $data["price"],
+                'visitor_id' => $visitor->id,
+                'reservation_id' => $this->reservation->id,
+                'confirmed' => true,
+            ]);
+        }
+    }
+
+    private function createSejours(array $data): void
+    {
         foreach ($data["sejours"] as $sejourData){
             // On commence par créer ou récupérer le visiteur
             if ($sejourData["visitor_id"]){
@@ -210,13 +259,6 @@ BLADE)))
             }
 
         }
-        $this->reservation->update([
-            'remarques_visiteur' => $data['remarques_visiteur'],
-            'contact_email' => $data['contact_email'],
-            'contact_phone' => $data['contact_phone'],
-        ]);
-        $this->reservation->confirm();
-        $this->redirectRoute('confirmed', $this->reservation->link_token);
     }
 
 
@@ -224,7 +266,9 @@ BLADE)))
     {
         return Repeater::make('sejours')
             ->label("Personnes")
+            ->hint("Saisissez les prénoms des personnes du groupe")
             ->required()
+            ->helperText("Saisissez les prénoms uniquement")
             ->defaultItems(1)
             ->minItems(1)
             ->reorderable()

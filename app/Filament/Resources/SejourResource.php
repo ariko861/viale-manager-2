@@ -119,6 +119,7 @@ class SejourResource extends Resource
                             })
                         ,
                         Toggle::make('authorize_edition')
+                            ->visible(fn(Reservation $record):bool => !$record->groupe)
                             ->label("Autorisé à modifier sa réservation")
                         ,
                     ])
