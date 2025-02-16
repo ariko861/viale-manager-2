@@ -51,6 +51,12 @@ class ReservationTable extends BaseWidget
                     ->label("Réservation confirmée")
                     ->boolean()
                 ,
+                Tables\Columns\IconColumn::make('groupe')
+                    ->wrapHeader()
+                    ->label("Groupe")
+                    ->boolean()
+                ,
+
 
             ])
             ->defaultPaginationPageOption(5)
@@ -64,8 +70,10 @@ class ReservationTable extends BaseWidget
                         $reservation = Reservation::createQuickReservation(
                             max_days_change: $data['max_days_change'],
                             max_visitors: $data["max_visitors"],
-                            remarques_accueil: $data['remarques_accueil']
+                            remarques_accueil: $data['remarques_accueil'],
                         );
+                        $reservation->groupe = $data['groupe'] ?? false;
+                        $reservation->nom_groupe = $data['nom_groupe'] ?? "";
                         $reservation->contact_email = $data['contact_email'];
                         $reservation->save();
 //                        $this->lien_reservation = $reservation->getLink();
@@ -128,17 +136,17 @@ class ReservationTable extends BaseWidget
                 ->label("Exiger les emails de tous les inscrits")
                 ->disabled(fn(Get $get) => $get('groupe'))
             ,
-//            Toggle::make('groupe')
-//                ->default(false)
-//                ->label("Formulaire pour grand groupe")
-//                ->helperText("Attention, le but est de fournir un formulaire simplifié, des dates et prix individuels ne pourront pas être définis")
-//                ->hint("Formulaire spécial pour grands groupes, le formulaire sera simplifié et seuls les prénoms seront demandés")
-//                ->live()
-//                ->afterStateUpdated(function(Set $set, Get $get) {
-//                    $set('all_mails_required', false);
-//                    if ($get('max_visitors') <= 50) $set('max_visitors', 50);
-//                })
-//            ,
+            Toggle::make('groupe')
+                ->default(false)
+                ->label("Formulaire pour grand groupe")
+                ->helperText("Attention, le but est de fournir un formulaire simplifié, des dates et prix individuels ne pourront pas être définis")
+                ->hint("Formulaire spécial pour grands groupes, le formulaire sera simplifié et seuls les prénoms seront demandés")
+                ->live()
+                ->afterStateUpdated(function(Set $set, Get $get) {
+                    $set('all_mails_required', false);
+                    if ($get('max_visitors') <= 50) $set('max_visitors', 50);
+                })
+            ,
             TextInput::make('nom_groupe')
                 ->label("Nom du groupe")
                 ->required(fn(Get $get) => $get('groupe'))
