@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ReservationResource\Pages;
 
 use App\Filament\Resources\ReservationResource;
+use App\Filament\Resources\SejourResource;
 use App\Models\Profile;
 use App\Models\Reservation;
 use App\Models\Sejour;
@@ -84,7 +85,15 @@ class CreateReservation extends CreateRecord
                         }))
                     ,
                     $this->getNormalVisitorForm()->visible(fn(Get $get) => !$get('groupe')),
-                    $this->getSimplifiedForm()->visible(fn(Get $get) => $get('groupe')),
+                    TextInput::make('number_visitors')
+                        ->label("Nombre de visiteurs")
+                        ->visible(fn(Get $get) => $get('groupe'))
+                        ->required(fn(Get $get) => $get('groupe'))
+                        ->dehydrated()
+                        ->prefixIcon('heroicon-o-user')
+                        ->integer()
+                    ,
+//                    $this->getSimplifiedForm()->visible(fn(Get $get) => $get('groupe')),
 
 
 
@@ -184,11 +193,15 @@ class CreateReservation extends CreateRecord
             'confirmed_at' => Carbon::now(),
         ]);
 
-        foreach ($data['visitors'] as $prenom){
+        $visitor_number = $data['number_visitors'];
+
+        for ($i = 1; $i <= $visitor_number; $i++){
+
             # Pour chaque nom saisi, on créé un visiteur avec le nom du groupe en guise de nom de famille
             $visitor = Visitor::query()->create([
                 'nom' => $data['nom_groupe'],
-                'prenom' => $prenom
+                'prenom' => "Personne ".$i,
+                'confirmed' => false,
             ]);
             # On ajoute un séjour à la réservation
             $reservation->sejours()->create([
@@ -202,4 +215,10 @@ class CreateReservation extends CreateRecord
         }
         return $reservation;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return SejourResource::getUrl('index', panel: 'admin');
+    }
+
 }
